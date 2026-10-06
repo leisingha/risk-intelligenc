@@ -41,6 +41,34 @@ def _dir_size_mb(path: Path) -> float:
     return sum(f.stat().st_size for f in path.rglob("*") if f.is_file()) / 1e6
 
 
+MAX_POS_WEIGHT = 20.0
+
+
+def class_pos_weight(y: np.ndarray) -> np.ndarray:
+    """neg/pos per class, capped. Without it, ~80% negative labels and only 90 optimiser
+    steps (240 passages, 3 epochs, batch 8) push every sigmoid below 0.5: pipeline run 4
+    predicted almost nothing (macro-F1 0.02). Weighting positives rebalances the loss
+    without changing the spec's fixed epochs, batch size or learning rate."""
+    pos = y.sum(axis=0).astype(float)
+    neg = len(y) - pos
+    return np.clip(neg / np.maximum(pos, 1.0), 1.0, MAX_POS_WEIGHT)
+
+
+def make_weighted_trainer(trainer_cls, torch, pos_weight: np.ndarray):
+    """Trainer whose loss is BCEWithLogitsLoss(pos_weight=...) — still sigmoid per class."""
+    weight = torch.tensor(pos_weight, dtype=torch.float32)
+
+    class WeightedTrainer(trainer_cls):
+        def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+            labels = inputs.pop("labels")
+            outputs = model(**inputs)
+            loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=weight.to(outputs.logits.device))
+            loss = loss_fn(outputs.logits, labels.float())
+            return (loss, outputs) if return_outputs else loss
+
+    return WeightedTrainer
+
+
 def train(train_df: pd.DataFrame, out_dir: Path = DISTILBERT_DIR) -> dict:
     import torch
     from transformers import (
@@ -76,7 +104,8 @@ def train(train_df: pd.DataFrame, out_dir: Path = DISTILBERT_DIR) -> dict:
         report_to=[],
         use_cpu=True,
     )
-    trainer = Trainer(
+    pos_weight = class_pos_weight(label_matrix(train_df))
+    trainer = make_weighted_trainer(Trainer, torch, pos_weight)(
         model=model,
         args=args,
         train_dataset=_dataset(train_df, tokenizer),
@@ -97,6 +126,7 @@ def train(train_df: pd.DataFrame, out_dir: Path = DISTILBERT_DIR) -> dict:
         "parameters": int(sum(p.numel() for p in model.parameters())),
         "model_size_mb": round(_dir_size_mb(out_dir), 1),
         "device": "cpu",
+        "pos_weight": {c: round(float(w), 2) for c, w in zip(CATEGORIES, pos_weight, strict=True)},
         "torch_threads": torch.get_num_threads(),
     }
 
@@ -140,6 +170,16 @@ def evaluate(test_df: pd.DataFrame) -> tuple[dict, float]:
     y_pred = (probs >= THRESHOLD).astype(int)
     y_true = label_matrix(test_df)
     metrics = compute_metrics(y_true, y_pred)
+    # Collapse detector: a model that predicts no positives shows mean P far below 0.5
+    # and a predicted-positive rate of ~0 against the true rate.
+    metrics["probability_diagnostics"] = {
+        c: {
+            "mean_p": round(float(probs[:, i].mean()), 4),
+            "predicted_pos_rate": round(float(y_pred[:, i].mean()), 4),
+            "true_pos_rate": round(float(y_true[:, i].mean()), 4),
+        }
+        for i, c in enumerate(CATEGORIES)
+    }
     plot_confusion(y_true, y_pred, "distilbert")
     return metrics, per_passage_ms
 
@@ -179,6 +219,7 @@ def main() -> None:
                 k: metrics[k] for k in ["macro_f1", "micro_f1", "subset_accuracy", "hamming_loss"]
             },
             "per_class": metrics["per_class"],
+            "probability_diagnostics": metrics["probability_diagnostics"],
             "inference_ms_per_passage_cpu": round(ms, 1),
             "threshold": THRESHOLD,
         },

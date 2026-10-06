@@ -43,3 +43,34 @@ def test_embedding_mismatch_fails_loudly(index_dir):
 def test_unknown_company_raises():
     with pytest.raises(KeyError):
         resolve_company("Tesla")
+
+
+def test_eval_set_reports_unresolved_items(tmp_path, fixture_df):
+    import json
+
+    from src.rag.retrieve import load_eval_set
+
+    passages = tmp_path / "p.parquet"
+    fixture_df.to_parquet(passages)
+    evalf = tmp_path / "e.jsonl"
+    evalf.write_text(
+        json.dumps(
+            {
+                "id": "ok",
+                "question": "q1",
+                "expected_rule": {"ticker": "XOM", "all_terms": ["greenhouse"]},
+            }
+        )
+        + "\n"
+        + json.dumps(
+            {
+                "id": "bad",
+                "question": "q2",
+                "expected_rule": {"ticker": "XOM", "all_terms": ["zzz-not-there"]},
+            }
+        )
+        + "\n"
+    )
+    resolved, unresolved = load_eval_set(evalf, passages)
+    assert [i["id"] for i in resolved] == ["ok"] and resolved[0]["expected_passage_ids"]
+    assert [i["id"] for i in unresolved] == ["bad"]

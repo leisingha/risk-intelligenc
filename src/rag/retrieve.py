@@ -151,13 +151,19 @@ class Retriever:
 
 def load_eval_set(
     path: Path = RETRIEVAL_EVAL_PATH, passages_path: Path = PASSAGES_PATH
-) -> list[dict]:
+) -> tuple[list[dict], list[dict]]:
     """Each item names its expected passages directly, or by a rule (ticker + required
-    terms) resolved against passages.parquet. Items that resolve to nothing fail loudly."""
+    terms) resolved against passages.parquet.
+
+    Returns (resolved, unresolved). Unresolved items are never silently dropped: every
+    one is printed and recorded in RESULTS.md, and the question count reported is the
+    resolved count, so a reader sees exactly what the metrics cover."""
     items = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
     passages = pd.read_parquet(passages_path) if passages_path.exists() else None
+    resolved, unresolved = [], []
     for item in items:
         if item.get("expected_passage_ids"):
+            resolved.append(item)
             continue
         rule = item.get("expected_rule")
         if rule is None or passages is None:
@@ -169,13 +175,19 @@ def load_eval_set(
         for term in rule["all_terms"]:
             mask &= passages.text.str.contains(term, case=False, regex=True)
         ids = passages[mask].passage_id.tolist()
-        if not ids:
-            raise ValueError(
-                f"Eval item {item['id']}: rule {rule} matches no passage; "
-                "rewrite it against the real corpus"
-            )
-        item["expected_passage_ids"] = ids
-    return items
+        if ids:
+            item["expected_passage_ids"] = ids
+            resolved.append(item)
+        else:
+            unresolved.append(item)
+    for item in unresolved:
+        print(
+            f"WARNING eval item {item['id']} unresolved: rule {item['expected_rule']} "
+            "matches no passage in the corpus; rewrite it"
+        )
+    if not resolved:
+        raise ValueError("No retrieval eval item resolved against the corpus")
+    return resolved, unresolved
 
 
 def evaluate(retriever: Retriever, items: list[dict], rerank: bool) -> dict:
@@ -216,7 +228,7 @@ def main() -> None:
         for h in retriever.retrieve(args.query, k=args.k, company=args.company, sector=args.sector):
             print(f"{h.score:.3f} (dense {h.dense_score:.3f}) {h.passage_id}: {h.text[:160]}...")
     if args.eval:
-        items = load_eval_set()
+        items, unresolved = load_eval_set()
         table = {}
         for name, rerank in [("dense_only", False), ("dense_plus_rerank", True)]:
             res = evaluate(retriever, items, rerank)
@@ -231,6 +243,8 @@ def main() -> None:
             "retrieval",
             {
                 "n_questions": len(items),
+                "unresolved_questions": [f"{i['id']}: {i['question']}" for i in unresolved]
+                or "none",
                 "metrics": table,
                 "embed_model": backend_id(),
                 "dense_weight": DENSE_WEIGHT,
