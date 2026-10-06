@@ -19,7 +19,7 @@ Citations: XOM-2024-008, XOM-2025-005
 Trace:
   - plan (rule-based): intent=search; calls=search_risk_disclosures(query='How does climate change regulation affect Exxon Mo', company='XOM')
   - act: search_risk_disclosures(query='How does climate change regulation affect Exxon Mo', company='XOM')
-  - observe: 8 passages, best 0.583 (XOM-2024-008, Exxon Mobil Corp)
+  - observe: 8 passages, best 0.582 (XOM-2024-008, Exxon Mobil Corp)
   - reflect: evidence gathered → answer
   - answer: grounded, 2 citation(s)
 ```

@@ -1,6 +1,6 @@
 {
   "agent": {
-    "_recorded_at": "2026-10-06T19:30:50+00:00",
+    "_recorded_at": "2026-10-06T19:59:42+00:00",
     "adversarial": [
       {
         "id": "a01",
@@ -114,7 +114,7 @@
     "planner": "rule-based"
   },
   "baseline": {
-    "_recorded_at": "2026-10-06T19:18:47+00:00",
+    "_recorded_at": "2026-10-06T19:47:50+00:00",
     "best_model": "gradient_boosting",
     "confusion_figures": {
       "decision_tree": "notebooks/confusion_baseline_decision_tree.png",
@@ -257,7 +257,7 @@
         "micro_f1": 0.6536,
         "n_features": 8090,
         "subset_accuracy": 0.4,
-        "train_seconds": 0.12
+        "train_seconds": 0.11
       },
       "gradient_boosting": {
         "hamming_loss": 0.0694,
@@ -265,7 +265,7 @@
         "micro_f1": 0.8447,
         "n_features": 8090,
         "subset_accuracy": 0.6333,
-        "train_seconds": 8.36
+        "train_seconds": 7.62
       },
       "logreg_ovr": {
         "hamming_loss": 0.0861,
@@ -273,62 +273,62 @@
         "micro_f1": 0.805,
         "n_features": 8090,
         "subset_accuracy": 0.6333,
-        "train_seconds": 0.15
+        "train_seconds": 0.14
       }
     }
   },
   "clustering": {
-    "_recorded_at": "2026-10-06T19:18:50+00:00",
+    "_recorded_at": "2026-10-06T19:47:54+00:00",
     "clusters": {
       "cluster_0": {
-        "dominant_label": "regulatory (10/15)",
-        "sector_mix": "banking:152",
-        "size": 152,
-        "top_terms": "jpmorganchase, jpmorgan, jpmorgan chase, chase, clients, clients customers, customers, regulatory, operational, actions"
+        "dominant_label": "regulatory (14/21)",
+        "sector_mix": "banking:168",
+        "size": 168,
+        "top_terms": "jpmorganchase, jpmorgan, chase, jpmorgan chase, clients, clients customers, regulatory, customers, operational, governmental"
       },
       "cluster_1": {
-        "dominant_label": "regulatory (45/52)",
-        "sector_mix": "technology:151, banking:35, energy:31",
-        "size": 217,
-        "top_terms": "laws, regulations, laws regulations, subject, tax, legal, jurisdictions, regulatory, data, products"
+        "dominant_label": "cyber (30/31)",
+        "sector_mix": "banking:73, technology:56, energy:25",
+        "size": 154,
+        "top_terms": "systems, security, information, parties, data, incidents, access, cybersecurity, attacks, cyber"
       },
       "cluster_2": {
-        "dominant_label": "operational (17/39)",
-        "sector_mix": "technology:218, banking:6",
-        "size": 224,
-        "top_terms": "products, services, product, new, demand, products services, supply, customers, offerings, cloud"
+        "dominant_label": "regulatory (41/94)",
+        "sector_mix": "technology:411, banking:31, energy:24",
+        "size": 466,
+        "top_terms": "products, services, products services, new, customers, product, laws, operations, data, impact"
       },
       "cluster_3": {
-        "dominant_label": "credit (22/30)",
-        "sector_mix": "banking:161, technology:8",
-        "size": 169,
-        "top_terms": "credit, liquidity, market, capital, losses, rates, economic, debt, jpmorganchase, jpmorgan chase"
+        "dominant_label": "market (24/28)",
+        "sector_mix": "banking:129, technology:37, energy:6",
+        "size": 172,
+        "top_terms": "credit, rates, market, economic, interest, interest rates, conditions, liquidity, losses, markets"
       },
       "cluster_4": {
-        "dominant_label": "cyber (31/34)",
-        "sector_mix": "technology:73, banking:47, energy:22",
-        "size": 142,
-        "top_terms": "systems, information, security, data, parties, services, incidents, access, cybersecurity, attacks"
+        "dominant_label": "regulatory (11/17)",
+        "sector_mix": "banking:159, technology:19",
+        "size": 178,
+        "top_terms": "citi, regulatory, tax, capital, changes, regulatory capital, requirements, subject, additional, financial"
       },
       "cluster_5": {
-        "dominant_label": "climate (68/130)",
-        "sector_mix": "energy:182, technology:124, banking:22",
-        "size": 328,
-        "top_terms": "operations, gas, oil, financial, climate, future, emissions, energy, change, oil gas"
+        "dominant_label": "climate (70/109)",
+        "sector_mix": "energy:180, technology:51, banking:13",
+        "size": 244,
+        "top_terms": "gas, oil, climate, emissions, operations, energy, oil gas, climate change, change, production"
       }
     },
     "figure": "notebooks/clusters.png",
     "k": 6,
-    "silhouette": 0.0444,
+    "silhouette": 0.0435,
     "svd_components": 100,
-    "svd_explained_variance": 0.2975
+    "svd_explained_variance": 0.2751
   },
   "comparison": {
-    "_recorded_at": "2026-10-06T19:25:17+00:00",
+    "_recorded_at": "2026-10-06T19:54:17+00:00",
     "baseline_model": "gradient_boosting",
-    "baseline_train_seconds": 8.36,
+    "baseline_train_seconds": 7.62,
     "classes_where_baseline_wins": "credit, market, operational, regulatory, cyber, climate",
-    "distilbert_train_seconds": 357.7,
+    "distilbert_train_seconds": 359.0,
     "per_class_f1": {
       "climate": {
         "delta": -0.1466,
@@ -382,7 +382,7 @@
     }
   },
   "dataset": {
-    "_recorded_at": "2026-10-06T19:18:35+00:00",
+    "_recorded_at": "2026-10-06T19:47:37+00:00",
     "co_occurrence": {
       "climate": {
         "climate": 93,
@@ -448,80 +448,78 @@
     }
   },
   "ingestion": {
-    "_recorded_at": "2026-10-06T19:18:34+00:00",
+    "_recorded_at": "2026-10-06T19:47:37+00:00",
     "companies": 11,
     "extraction_methods": {
       "item_1a_heading": 30,
-      "risk_factors_heading": 1
+      "risk_subsections": 3
     },
-    "failure_rate": 0.1389,
+    "failure_rate": 0.0833,
     "failure_reasons": {
-      "section_too_short": 5
+      "section_too_short": 3
     },
-    "filings_extracted": 31,
-    "filings_failed": 5,
+    "filings_extracted": 33,
+    "filings_failed": 3,
     "filings_total": 36,
-    "passage_words_mean": 257.1,
-    "passages_outside_200_400_words": 63,
+    "passage_words_mean": 256.3,
+    "passages_outside_200_400_words": 65,
     "passages_per_sector": {
-      "banking": 423,
+      "banking": 573,
       "energy": 235,
       "technology": 574
     },
-    "passages_total": 1232,
+    "passages_total": 1382,
     "sectors": 3
   },
   "retrieval": {
-    "_recorded_at": "2026-10-06T19:30:40+00:00",
+    "_recorded_at": "2026-10-06T19:59:33+00:00",
     "dense_weight": 0.7,
     "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
     "index": {
       "chunk_overlap_tokens": 32,
       "chunk_size_tokens": 200,
-      "chunks": 2840,
+      "chunks": 3183,
       "classifier": "distilbert",
-      "classify_seconds": 201.3,
+      "classify_seconds": 190.4,
       "collection": "risk_passages",
       "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
-      "embed_seconds": 106.2,
-      "passages": 1232,
-      "stored_vectors": 2840
+      "embed_seconds": 109.9,
+      "passages": 1382,
+      "stored_vectors": 3183
     },
     "metrics": {
       "dense_only": {
-        "hit_rate@1": 0.8235,
-        "hit_rate@3": 0.9412,
-        "hit_rate@5": 0.9412,
+        "hit_rate@1": 0.8421,
+        "hit_rate@3": 0.9474,
+        "hit_rate@5": 0.9474,
         "hit_rate@8": 1.0,
-        "mrr@1": 0.8235,
-        "mrr@3": 0.8725,
-        "mrr@5": 0.8725,
-        "mrr@8": 0.881
+        "mrr@1": 0.8421,
+        "mrr@3": 0.886,
+        "mrr@5": 0.886,
+        "mrr@8": 0.8935
       },
       "dense_plus_rerank": {
-        "hit_rate@1": 0.8824,
+        "hit_rate@1": 0.8947,
         "hit_rate@3": 1.0,
         "hit_rate@5": 1.0,
         "hit_rate@8": 1.0,
-        "mrr@1": 0.8824,
-        "mrr@3": 0.9412,
-        "mrr@5": 0.9412,
-        "mrr@8": 0.9412
+        "mrr@1": 0.8947,
+        "mrr@3": 0.9474,
+        "mrr@5": 0.9474,
+        "mrr@8": 0.9474
       }
     },
-    "n_questions": 17,
+    "n_questions": 19,
     "unresolved_questions": [
-      "r09: Citigroup risks from operating in emerging markets",
-      "r10: Wells Fargo consent orders and regulatory restrictions on growth",
-      "r20: Citigroup reliance on third-party vendors and operational disruptions"
+      "r10: Wells Fargo consent orders and regulatory restrictions on growth"
     ]
   },
   "transformer": {
-    "_recorded_at": "2026-10-06T19:25:17+00:00",
+    "_recorded_at": "2026-10-06T19:54:17+00:00",
     "batch_size": 8,
     "device": "cpu",
     "epochs": 3,
-    "inference_ms_per_passage_cpu": 163.4,
+    "inference_ms_per_passage_cpu": 132.1,
     "learning_rate": 2e-05,
     "max_length": 256,
     "metrics": {
@@ -612,6 +610,6 @@
     },
     "threshold": 0.5,
     "torch_threads": 2,
-    "train_seconds": 357.7
+    "train_seconds": 359.0
   }
 }
