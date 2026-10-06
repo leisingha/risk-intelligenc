@@ -1,6 +1,6 @@
 {
   "agent": {
-    "_recorded_at": "2026-10-06T18:37:21+00:00",
+    "_recorded_at": "2026-10-06T19:08:05+00:00",
     "adversarial": [
       {
         "id": "a01",
@@ -114,7 +114,7 @@
     "planner": "rule-based"
   },
   "baseline": {
-    "_recorded_at": "2026-10-06T18:32:08+00:00",
+    "_recorded_at": "2026-10-06T18:58:58+00:00",
     "best_model": "gradient_boosting",
     "confusion_figures": {
       "decision_tree": "notebooks/confusion_baseline_decision_tree.png",
@@ -257,7 +257,7 @@
         "micro_f1": 0.7595,
         "n_features": 8343,
         "subset_accuracy": 0.55,
-        "train_seconds": 0.11
+        "train_seconds": 0.1
       },
       "gradient_boosting": {
         "hamming_loss": 0.075,
@@ -265,7 +265,7 @@
         "micro_f1": 0.8402,
         "n_features": 8343,
         "subset_accuracy": 0.6167,
-        "train_seconds": 11.89
+        "train_seconds": 6.49
       },
       "logreg_ovr": {
         "hamming_loss": 0.0861,
@@ -273,62 +273,62 @@
         "micro_f1": 0.8098,
         "n_features": 8343,
         "subset_accuracy": 0.6,
-        "train_seconds": 0.12
+        "train_seconds": 0.11
       }
     }
   },
   "clustering": {
-    "_recorded_at": "2026-10-06T18:32:10+00:00",
+    "_recorded_at": "2026-10-06T18:59:01+00:00",
     "clusters": {
       "cluster_0": {
-        "dominant_label": "market (28/42)",
-        "sector_mix": "banking:64, technology:4",
-        "size": 68,
-        "top_terms": "credit, jpmorganchase, liquidity, capital, market, losses, rates, debt, financial, economic"
+        "dominant_label": "regulatory (27/37)",
+        "sector_mix": "technology:121, banking:10, energy:6",
+        "size": 137,
+        "top_terms": "laws, regulations, laws regulations, tax, subject, legal, data, products, claims, jurisdictions"
       },
       "cluster_1": {
-        "dominant_label": "operational (33/92)",
-        "sector_mix": "technology:293, energy:13, banking:3",
-        "size": 309,
-        "top_terms": "products, services, products services, new, product, operations, financial, data, laws, financial condition"
+        "dominant_label": "climate (64/98)",
+        "sector_mix": "energy:162, technology:23, banking:3",
+        "size": 188,
+        "top_terms": "gas, oil, emissions, energy, climate, production, oil gas, operations, chevron, climate change"
       },
       "cluster_2": {
-        "dominant_label": "climate (57/90)",
-        "sector_mix": "energy:155, technology:13, banking:2",
-        "size": 170,
-        "top_terms": "gas, oil, emissions, chevron, oil gas, production, energy, climate, operations, natural gas"
+        "dominant_label": "operational (30/74)",
+        "sector_mix": "technology:232, banking:22, energy:3",
+        "size": 257,
+        "top_terms": "products, services, product, supply, demand, customers, products services, new, revenue, impact"
       },
       "cluster_3": {
-        "dominant_label": "regulatory (24/36)",
-        "sector_mix": "banking:64",
-        "size": 64,
-        "top_terms": "jpmorganchase, clients, clients customers, operational, systems, regulatory, services, governmental, applicable law, applicable"
+        "dominant_label": "market (30/37)",
+        "sector_mix": "banking:175, technology:9, energy:3",
+        "size": 187,
+        "top_terms": "credit, market, liquidity, capital, jpmorgan chase, chase, jpmorgan, losses, economic, jpmorganchase"
       },
       "cluster_4": {
-        "dominant_label": "operational (11/20)",
-        "sector_mix": "technology:75, energy:6",
-        "size": 81,
-        "top_terms": "export, china, export controls, products, controls, usg, restrictions, customers, impact, supply"
+        "dominant_label": "regulatory (20/23)",
+        "sector_mix": "banking:153",
+        "size": 153,
+        "top_terms": "jpmorganchase, chase, jpmorgan chase, jpmorgan, clients, regulatory, clients customers, actions, services, governmental"
       },
       "cluster_5": {
-        "dominant_label": "cyber (20/20)",
-        "sector_mix": "technology:44, energy:10, banking:5",
-        "size": 59,
-        "top_terms": "systems, security, information, attacks, access, data, threats, customers, incidents, vulnerabilities"
+        "dominant_label": "cyber (29/31)",
+        "sector_mix": "banking:68, technology:44, energy:10",
+        "size": 122,
+        "top_terms": "systems, information, security, parties, access, attacks, data, customers, cyber, jpmorganchase"
       }
     },
     "figure": "notebooks/clusters.png",
     "k": 6,
-    "silhouette": 0.0388,
+    "silhouette": 0.0458,
     "svd_components": 100,
-    "svd_explained_variance": 0.43
+    "svd_explained_variance": 0.3355
   },
   "comparison": {
-    "_recorded_at": "2026-10-06T18:35:27+00:00",
+    "_recorded_at": "2026-10-06T19:04:13+00:00",
     "baseline_model": "gradient_boosting",
-    "baseline_train_seconds": 11.89,
+    "baseline_train_seconds": 6.49,
     "classes_where_baseline_wins": "credit, market, operational, regulatory, cyber, climate",
-    "distilbert_train_seconds": 176.8,
+    "distilbert_train_seconds": 289.4,
     "per_class_f1": {
       "climate": {
         "delta": -0.2195,
@@ -382,7 +382,7 @@
     }
   },
   "dataset": {
-    "_recorded_at": "2026-10-06T18:31:53+00:00",
+    "_recorded_at": "2026-10-06T18:58:49+00:00",
     "co_occurrence": {
       "climate": {
         "climate": 77,
@@ -448,44 +448,44 @@
     }
   },
   "ingestion": {
-    "_recorded_at": "2026-10-06T18:31:52+00:00",
+    "_recorded_at": "2026-10-06T18:58:49+00:00",
     "companies": 9,
     "extraction_methods": {
-      "item_1a_heading": 20,
+      "item_1a_heading": 24,
       "risk_factors_heading": 1
     },
-    "failure_rate": 0.25,
+    "failure_rate": 0.3056,
     "failure_reasons": {
-      "section_too_short": 7
+      "section_too_short": 11
     },
-    "filings_extracted": 21,
-    "filings_failed": 7,
-    "filings_total": 28,
-    "passage_words_mean": 260.1,
-    "passages_outside_200_400_words": 48,
+    "filings_extracted": 25,
+    "filings_failed": 11,
+    "filings_total": 36,
+    "passage_words_mean": 256.0,
+    "passages_outside_200_400_words": 54,
     "passages_per_sector": {
-      "banking": 138,
+      "banking": 431,
       "energy": 184,
       "technology": 429
     },
-    "passages_total": 751,
+    "passages_total": 1044,
     "sectors": 3
   },
   "retrieval": {
-    "_recorded_at": "2026-10-06T18:37:13+00:00",
+    "_recorded_at": "2026-10-06T19:07:58+00:00",
     "dense_weight": 0.7,
     "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
     "index": {
       "chunk_overlap_tokens": 32,
       "chunk_size_tokens": 200,
-      "chunks": 1731,
+      "chunks": 2408,
       "classifier": "distilbert",
-      "classify_seconds": 58.5,
+      "classify_seconds": 136.6,
       "collection": "risk_passages",
       "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
-      "embed_seconds": 35.6,
-      "passages": 751,
-      "stored_vectors": 1731
+      "embed_seconds": 75.0,
+      "passages": 1044,
+      "stored_vectors": 2408
     },
     "metrics": {
       "dense_only": {
@@ -494,9 +494,9 @@
         "hit_rate@5": 0.9333,
         "hit_rate@8": 1.0,
         "mrr@1": 0.8,
-        "mrr@3": 0.8667,
-        "mrr@5": 0.8667,
-        "mrr@8": 0.875
+        "mrr@3": 0.8556,
+        "mrr@5": 0.8556,
+        "mrr@8": 0.8639
       },
       "dense_plus_rerank": {
         "hit_rate@1": 0.8667,
@@ -519,11 +519,11 @@
     ]
   },
   "transformer": {
-    "_recorded_at": "2026-10-06T18:35:27+00:00",
+    "_recorded_at": "2026-10-06T19:04:13+00:00",
     "batch_size": 8,
     "device": "cpu",
     "epochs": 3,
-    "inference_ms_per_passage_cpu": 75.3,
+    "inference_ms_per_passage_cpu": 127.6,
     "learning_rate": 2e-05,
     "max_length": 256,
     "metrics": {
@@ -614,6 +614,6 @@
     },
     "threshold": 0.5,
     "torch_threads": 2,
-    "train_seconds": 176.8
+    "train_seconds": 289.4
   }
 }

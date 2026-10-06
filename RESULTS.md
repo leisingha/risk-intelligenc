@@ -6,19 +6,19 @@ re-run the phase that produced a number to change it.
 ## Ingestion and extraction
 
 - **companies**: 9
-- **extraction_methods**: item_1a_heading=20, risk_factors_heading=1
-- **failure_rate**: 0.2500
-- **failure_reasons**: section_too_short=7
-- **filings_extracted**: 21
-- **filings_failed**: 7
-- **filings_total**: 28
-- **passage_words_mean**: 260.1000
-- **passages_outside_200_400_words**: 48
-- **passages_per_sector**: banking=138, energy=184, technology=429
-- **passages_total**: 751
+- **extraction_methods**: item_1a_heading=24, risk_factors_heading=1
+- **failure_rate**: 0.3056
+- **failure_reasons**: section_too_short=11
+- **filings_extracted**: 25
+- **filings_failed**: 11
+- **filings_total**: 36
+- **passage_words_mean**: 256.0000
+- **passages_outside_200_400_words**: 54
+- **passages_per_sector**: banking=431, energy=184, technology=429
+- **passages_total**: 1044
 - **sectors**: 3
 
-_Recorded 2026-10-06T18:31:52+00:00._
+_Recorded 2026-10-06T18:58:49+00:00._
 
 ## Labelled dataset
 
@@ -40,7 +40,7 @@ _Recorded 2026-10-06T18:31:52+00:00._
 - **passages_with_no_label**: 54
 - **positives_per_category**: climate=77, credit=37, cyber=62, market=58, operational=75, regulatory=123
 
-_Recorded 2026-10-06T18:31:53+00:00._
+_Recorded 2026-10-06T18:58:49+00:00._
 
 ## Classical baselines (TF-IDF)
 
@@ -87,12 +87,12 @@ _Recorded 2026-10-06T18:31:53+00:00._
 
 | | hamming_loss | macro_f1 | micro_f1 | n_features | subset_accuracy | train_seconds |
 |---|---|---|---|---|---|---|
-| decision_tree | 0.1056 | 0.7171 | 0.7595 | 8343 | 0.5500 | 0.1100 |
-| gradient_boosting | 0.0750 | 0.8128 | 0.8402 | 8343 | 0.6167 | 11.8900 |
-| logreg_ovr | 0.0861 | 0.7610 | 0.8098 | 8343 | 0.6000 | 0.1200 |
+| decision_tree | 0.1056 | 0.7171 | 0.7595 | 8343 | 0.5500 | 0.1000 |
+| gradient_boosting | 0.0750 | 0.8128 | 0.8402 | 8343 | 0.6167 | 6.4900 |
+| logreg_ovr | 0.0861 | 0.7610 | 0.8098 | 8343 | 0.6000 | 0.1100 |
 
 
-_Recorded 2026-10-06T18:32:08+00:00._
+_Recorded 2026-10-06T18:58:58+00:00._
 
 ## Unsupervised analysis (TF-IDF → SVD → KMeans)
 
@@ -100,27 +100,27 @@ _Recorded 2026-10-06T18:32:08+00:00._
 
 | | dominant_label | sector_mix | size | top_terms |
 |---|---|---|---|---|
-| cluster_0 | market (28/42) | banking:64, technology:4 | 68 | credit, jpmorganchase, liquidity, capital, market, losses, rates, debt, financial, economic |
-| cluster_1 | operational (33/92) | technology:293, energy:13, banking:3 | 309 | products, services, products services, new, product, operations, financial, data, laws, financial condition |
-| cluster_2 | climate (57/90) | energy:155, technology:13, banking:2 | 170 | gas, oil, emissions, chevron, oil gas, production, energy, climate, operations, natural gas |
-| cluster_3 | regulatory (24/36) | banking:64 | 64 | jpmorganchase, clients, clients customers, operational, systems, regulatory, services, governmental, applicable law, applicable |
-| cluster_4 | operational (11/20) | technology:75, energy:6 | 81 | export, china, export controls, products, controls, usg, restrictions, customers, impact, supply |
-| cluster_5 | cyber (20/20) | technology:44, energy:10, banking:5 | 59 | systems, security, information, attacks, access, data, threats, customers, incidents, vulnerabilities |
+| cluster_0 | regulatory (27/37) | technology:121, banking:10, energy:6 | 137 | laws, regulations, laws regulations, tax, subject, legal, data, products, claims, jurisdictions |
+| cluster_1 | climate (64/98) | energy:162, technology:23, banking:3 | 188 | gas, oil, emissions, energy, climate, production, oil gas, operations, chevron, climate change |
+| cluster_2 | operational (30/74) | technology:232, banking:22, energy:3 | 257 | products, services, product, supply, demand, customers, products services, new, revenue, impact |
+| cluster_3 | market (30/37) | banking:175, technology:9, energy:3 | 187 | credit, market, liquidity, capital, jpmorgan chase, chase, jpmorgan, losses, economic, jpmorganchase |
+| cluster_4 | regulatory (20/23) | banking:153 | 153 | jpmorganchase, chase, jpmorgan chase, jpmorgan, clients, regulatory, clients customers, actions, services, governmental |
+| cluster_5 | cyber (29/31) | banking:68, technology:44, energy:10 | 122 | systems, information, security, parties, access, attacks, data, customers, cyber, jpmorganchase |
 
 - **figure**: notebooks/clusters.png
 - **k**: 6
-- **silhouette**: 0.0388
+- **silhouette**: 0.0458
 - **svd_components**: 100
-- **svd_explained_variance**: 0.4300
+- **svd_explained_variance**: 0.3355
 
-_Recorded 2026-10-06T18:32:10+00:00._
+_Recorded 2026-10-06T18:59:01+00:00._
 
 ## DistilBERT fine-tune
 
 - **batch_size**: 8
 - **device**: cpu
 - **epochs**: 3
-- **inference_ms_per_passage_cpu**: 75.3000
+- **inference_ms_per_passage_cpu**: 127.6000
 - **learning_rate**: 0.0000
 - **max_length**: 256
 - **metrics**: hamming_loss=0.2278, macro_f1=0.6079, micro_f1=0.6339, subset_accuracy=0.1833
@@ -151,16 +151,16 @@ _Recorded 2026-10-06T18:32:10+00:00._
 
 - **threshold**: 0.5000
 - **torch_threads**: 2
-- **train_seconds**: 176.8000
+- **train_seconds**: 289.4000
 
-_Recorded 2026-10-06T18:35:27+00:00._
+_Recorded 2026-10-06T19:04:13+00:00._
 
 ## Baseline vs transformer (same test split)
 
 - **baseline_model**: gradient_boosting
-- **baseline_train_seconds**: 11.8900
+- **baseline_train_seconds**: 6.4900
 - **classes_where_baseline_wins**: credit, market, operational, regulatory, cyber, climate
-- **distilbert_train_seconds**: 176.8000
+- **distilbert_train_seconds**: 289.4000
 **per_class_f1**
 
 | | delta | distilbert_f1 | gradient_boosting_f1 | support | winner |
@@ -174,24 +174,24 @@ _Recorded 2026-10-06T18:35:27+00:00._
 | regulatory | -0.0880 | 0.7541 | 0.8421 | 27 | gradient_boosting |
 
 
-_Recorded 2026-10-06T18:35:27+00:00._
+_Recorded 2026-10-06T19:04:13+00:00._
 
 ## Retrieval evaluation
 
 - **dense_weight**: 0.7000
 - **embed_model**: sentence-transformers/all-MiniLM-L6-v2
-- **index**: chunk_overlap_tokens=32, chunk_size_tokens=200, chunks=1731, classifier=distilbert, classify_seconds=58.5000, collection=risk_passages, embed_model=sentence-transformers/all-MiniLM-L6-v2, embed_seconds=35.6000, passages=751, stored_vectors=1731
+- **index**: chunk_overlap_tokens=32, chunk_size_tokens=200, chunks=2408, classifier=distilbert, classify_seconds=136.6000, collection=risk_passages, embed_model=sentence-transformers/all-MiniLM-L6-v2, embed_seconds=75.0000, passages=1044, stored_vectors=2408
 **metrics**
 
 | | hit_rate@1 | hit_rate@3 | hit_rate@5 | hit_rate@8 | mrr@1 | mrr@3 | mrr@5 | mrr@8 |
 |---|---|---|---|---|---|---|---|---|
-| dense_only | 0.8000 | 0.9333 | 0.9333 | 1.0000 | 0.8000 | 0.8667 | 0.8667 | 0.8750 |
+| dense_only | 0.8000 | 0.9333 | 0.9333 | 1.0000 | 0.8000 | 0.8556 | 0.8556 | 0.8639 |
 | dense_plus_rerank | 0.8667 | 1.0000 | 1.0000 | 1.0000 | 0.8667 | 0.9333 | 0.9333 | 0.9333 |
 
 - **n_questions**: 15
 - **unresolved_questions**: ['r09: Citigroup risks from operating in emerging markets', 'r10: Wells Fargo consent orders and regulatory restrictions on growth', 'r11: Schlumberger geopolitical and international operations risk', 'r12: Oracle data center capacity for cloud services', 'r20: Citigroup reliance on third-party vendors and operational disruptions']
 
-_Recorded 2026-10-06T18:37:13+00:00._
+_Recorded 2026-10-06T19:07:58+00:00._
 
 ## Agent and adversarial refusals
 
@@ -228,4 +228,4 @@ _Recorded 2026-10-06T18:37:13+00:00._
 - **demo_questions**: 5
 - **planner**: rule-based
 
-_Recorded 2026-10-06T18:37:21+00:00._
+_Recorded 2026-10-06T19:08:05+00:00._
