@@ -54,7 +54,7 @@ def cluster(texts: list[str], k: int = 6, n_components: int = 100, min_df: int =
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("-k", type=int, default=6)
+    parser.add_argument("-k", type=int, default=6, help="clusters (max 6: one hue each)")
     args = parser.parse_args()
     df = pd.read_parquet(PASSAGES_PATH)
     res = cluster(df.text.tolist(), k=args.k)
@@ -80,12 +80,23 @@ def main() -> None:
             + (f" | {info['dominant_label']}" if "dominant_label" in info else "")
         )
 
+    from src.report import SERIES, _style
+
     fig, ax = plt.subplots(figsize=(7, 5.5))
-    sc = ax.scatter(res["z"][:, 0], res["z"][:, 1], c=res["assign"], cmap="tab10", s=8)
+    _style(ax)
+    for c in range(args.k):
+        m = res["assign"] == c
+        ax.scatter(
+            res["z"][m, 0],
+            res["z"][m, 1],
+            s=10,
+            color=SERIES[c % len(SERIES)],
+            label=f"{c}: {', '.join(res['top_terms'][c][:2])}",
+        )
     ax.set_xlabel("SVD component 1")
     ax.set_ylabel("SVD component 2")
-    ax.set_title(f"Risk passages: KMeans k={args.k} on LSA space")
-    ax.legend(*sc.legend_elements(), title="cluster", fontsize=8)
+    ax.set_title(f"Risk passages: KMeans k={args.k} on LSA space", loc="left")
+    ax.legend(title="cluster: top terms", fontsize=8, frameon=False)
     fig.tight_layout()
     fig_path = NOTEBOOKS_DIR / "clusters.png"
     fig.savefig(fig_path, dpi=110)
