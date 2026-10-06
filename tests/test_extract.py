@@ -92,3 +92,26 @@ def test_inline_spans_do_not_split_words():
     paras = html_to_paragraphs(html)
     assert paras[0] == "Item 1A. Risk Factors"
     assert paras[1] == "Line one line two"
+
+
+CITI_LIKE = "".join(
+    [
+        "<p>Risk Factors</p><p>See the Risk Factors section for a discussion.</p>",  # summary mention
+        "<p>MANAGEMENT'S DISCUSSION</p>" + "<p>" + "Revenue grew in the period. " * 300 + "</p>",
+        "<p>RISK FACTORS</p>",
+        "<p>STRATEGIC RISKS</p>",
+        "<p>" + "Changes in strategy could adversely affect results. " * 120 + "</p>",
+        "<p>CREDIT RISKS</p>",
+        "<p>" + "Borrowers may default on loans and counterparties may fail. " * 120 + "</p>",
+        "<p>SUSTAINABILITY</p>",
+        "<p>" + "We publish an annual sustainability report. " * 200 + "</p>",
+    ]
+)
+
+
+def test_risk_subsection_layout_ends_at_first_non_risk_heading():
+    result = isolate_item_1a(html_to_paragraphs(CITI_LIKE))
+    text = " ".join(result.paragraphs)
+    assert result.method == "risk_subsections"
+    assert "Borrowers may default" in text and "Changes in strategy" in text
+    assert "sustainability report" not in text and "Revenue grew" not in text

@@ -41,6 +41,13 @@ COMPANIES: dict[str, dict[str, str | int]] = {
 }
 
 
+def is_exhibit_13(filename: str) -> bool:
+    """EX-13 (Annual Report) file names vary: ...ex13.htm, ...exhibit13.htm, ex-13.htm.
+    Excludes EX-13.1-style names and non-HTML files."""
+    is_ex13 = re.search(r"ex(hibit)?[-_]?13(?!\d)", filename, re.I)
+    return bool(is_ex13) and filename.lower().endswith((".htm", ".html"))
+
+
 @dataclass
 class FilingRef:
     ticker: str
@@ -162,7 +169,13 @@ class EdgarClient:
         extraction can fall back to it."""
         listing = self.get(INDEX_URL.format(cik=ref.cik, accession=ref.accession.replace("-", "")))
         names = [i["name"] for i in listing.json()["directory"]["item"]]
-        ex13 = [n for n in names if re.search(r"ex-?13", n, re.I) and n.lower().endswith(".htm")]
+        ex13 = [n for n in names if is_exhibit_13(n)]
+        if not ex13:
+            log.info(
+                "No Exhibit 13 among %s files: %s",
+                ref.raw_path_stem,
+                [n for n in names if n.lower().endswith((".htm", ".html"))][:15],
+            )
         if ex13:
             resp = self.get(
                 ARCHIVE_URL.format(

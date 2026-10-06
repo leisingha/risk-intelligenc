@@ -107,6 +107,11 @@ def isolate_item_1a(paragraphs: list[str]) -> ExtractionResult:
         return ExtractionResult(_strip_heading(paragraphs[s + 1 : e]), "item_1a_heading")
 
     fb_starts = [i for i, p in enumerate(paragraphs) if FALLBACK_START_RE.match(p)]
+    structured = _risk_subsection_span(paragraphs, fb_starts)
+    if structured and structured[2] >= MIN_SECTION_WORDS:
+        s, e, _ = structured
+        return ExtractionResult(paragraphs[s + 1 : e], "risk_subsections")
+
     best_fb: tuple[int, int, int] | None = None
     for s in fb_starts:
         following = [e for e in ends if e > s]
@@ -125,6 +130,42 @@ def isolate_item_1a(paragraphs: list[str]) -> ExtractionResult:
     if not ends:
         raise ExtractionError("no_end_heading")
     raise ExtractionError("section_too_short")
+
+
+def _is_caps_heading(p: str) -> bool:
+    return p.isupper() and 1 <= len(p.split()) <= 8
+
+
+def _risk_subsection_span(paragraphs: list[str], starts: list[int]) -> tuple[int, int, int] | None:
+    """Annual-report layouts (Citi) have no "Item 1B/2" after the section. Their real
+    "RISK FACTORS" heading is followed by ALL-CAPS subsections that all end in "RISKS"
+    (STRATEGIC RISKS, CREDIT RISKS, ...); the section ends at the first ALL-CAPS heading
+    that is not a risk subsection (e.g. SUSTAINABILITY). Summary and cross-reference
+    mentions of "Risk Factors" lack that structure and are ignored."""
+    best = None
+    for s in starts:
+        first_caps = next(
+            (
+                i
+                for i in range(s + 1, min(s + 6, len(paragraphs)))
+                if _is_caps_heading(paragraphs[i])
+            ),
+            None,
+        )
+        if first_caps is None or not paragraphs[first_caps].rstrip(" :").endswith("RISKS"):
+            continue
+        end = next(
+            (
+                i
+                for i in range(first_caps + 1, len(paragraphs))
+                if _is_caps_heading(paragraphs[i]) and "RISK" not in paragraphs[i]
+            ),
+            len(paragraphs),
+        )
+        words = _word_count(paragraphs[s + 1 : end])
+        if best is None or words > best[2]:
+            best = (s, end, words)
+    return best
 
 
 _NEXT_SECTION_RE = re.compile(

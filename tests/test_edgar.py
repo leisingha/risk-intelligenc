@@ -88,3 +88,18 @@ def test_download_saves_exhibit_13_when_present(client, monkeypatch, tmp_path):
     ex13 = tmp_path / f"{ref.raw_path_stem}.ex13.htm"
     assert ex13.exists() and b"jpm-ex13.htm" in ex13.read_bytes()
     assert (tmp_path / f"{ref.raw_path_stem}.json").exists()
+
+
+@pytest.mark.parametrize(
+    "name,matches",
+    [
+        ("wfc-1231x2024xex13.htm", True),
+        ("wfc-12312024xexhibit13.htm", True),
+        ("ex-13.htm", True),
+        ("wfc-ex131.htm", False),  # exhibit 13.1 style suffix digits are not EX-13
+        ("wfc-ex10.htm", False),
+        ("wfc-ex13.pdf", False),
+    ],
+)
+def test_exhibit_13_name_matching(name, matches):
+    assert edgar.is_exhibit_13(name) is matches
