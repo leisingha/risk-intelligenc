@@ -1,8 +1,8 @@
 .env
 .venv/
-data/raw/
-models/
-.chroma/
+/data/raw/
+/models/
+/.chroma/
 __pycache__/
 *.pyc
 .pytest_cache/

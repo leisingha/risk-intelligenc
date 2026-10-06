@@ -21,11 +21,15 @@ if [ "$FROM" -le 2 ]; then
   if [ ! -f data/labels/labels.csv ]; then
     step "Phase 2: bootstrap labels"
     $PY -m src.nlp.labels --bootstrap
+    if [ "${SKIP_HAND_REVIEW:-0}" = "1" ]; then
+      echo "SKIP_HAND_REVIEW=1: continuing on keyword labels (label_source=keyword)."
+    else
     echo
     echo "=== HUMAN STEP ==="
     echo "Hand-correct data/labels/labels.csv (set label_source=hand per reviewed row),"
     echo "then re-run: ./run_pipeline.sh 2"
     exit 0
+    fi
   fi
   step "Phase 2: label stats, baselines, clustering"
   $PY -m src.nlp.labels --stats
