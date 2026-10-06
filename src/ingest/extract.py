@@ -63,11 +63,16 @@ def html_to_paragraphs(html: str | bytes) -> list[str]:
         tag.decompose()
     for hidden in soup.select('[style*="display:none"], [style*="display: none"]'):
         hidden.decompose()
+    for br in soup.find_all("br"):
+        br.replace_with(" ")
     paragraphs: list[str] = []
     for el in soup.find_all(BLOCK_TAGS):
         if el.find(BLOCK_TAGS):
             continue  # not a leaf block; its children will be visited
-        text = re.sub(r"\s+", " ", el.get_text(" ", strip=True)).strip()
+        # Join inline elements with no separator, as a browser renders them. Filings that
+        # style a first letter in its own <span> ("<span>R</span>isk Factors") otherwise
+        # become "R isk Factors" and no heading matches (Oracle and SLB, pipeline run 6).
+        text = re.sub(r"\s+", " ", el.get_text("")).strip()
         text = text.replace("’", "'").replace("“", '"').replace("”", '"')
         if text and not NOISE_RE.match(text):
             paragraphs.append(text)
@@ -201,7 +206,24 @@ def heading_report(paragraphs: list[str], limit: int = 25) -> list[str]:
         lines.append(
             f"  [{i:>5}] {paragraphs[i][:90]!r} -> {_word_count(paragraphs[i + 1 : nxt])} words"
         )
-    return lines or ["  (no heading-like paragraphs found)"]
+    lines = lines or ["  (no heading-like paragraphs found)"]
+    # Short ALL-CAPS lines after the first real "risk factors" heading: where a section
+    # without an "Item 1B/2" end marker (e.g. Citi's annual-report layout) actually ends.
+    starts = [i for i in hits if FALLBACK_START_RE.match(paragraphs[i])]
+    if starts:
+        start = max(starts, key=lambda i: _word_count(paragraphs[i + 1 : i + 400]))
+        caps = [
+            i
+            for i in range(start + 1, len(paragraphs))
+            if paragraphs[i].isupper() and 1 <= len(paragraphs[i].split()) <= 8
+        ][:30]
+        lines.append(f"  ALL-CAPS headings after [{start}]:")
+        for n, i in enumerate(caps):
+            nxt = caps[n + 1] if n + 1 < len(caps) else len(paragraphs)
+            lines.append(
+                f"    [{i:>5}] {paragraphs[i][:70]!r} -> {_word_count(paragraphs[i + 1 : nxt])} words"
+            )
+    return lines
 
 
 def _try_isolate(path: Path) -> tuple[ExtractionResult | None, str, list[str]]:
@@ -227,6 +249,13 @@ def extract_file(html_path: Path, meta: dict) -> tuple[list[dict], str]:
     if result is None:
         err = ExtractionError(reason)
         err.diagnostics = heading_report(paragraphs)
+        if ex13.exists():
+            err.diagnostics += [
+                "  -- exhibit 13 --",
+                *heading_report(html_to_paragraphs(ex13.read_bytes())),
+            ]
+        else:
+            err.diagnostics.append("  (no exhibit 13 saved for this filing)")
         raise err
     passages = pack_passages(result.paragraphs)
     year = meta["filing_date"][:4]

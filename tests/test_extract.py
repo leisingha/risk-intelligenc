@@ -81,3 +81,14 @@ def test_failure_carries_heading_diagnostics(tmp_path):
         extract_file(primary, {**META, "ticker": "WFC"})
     report = "\n".join(info.value.diagnostics)
     assert "Item 1A. Risk Factors" in report and "Item 1B" in report
+
+
+def test_inline_spans_do_not_split_words():
+    """Filings that style a first letter separately must still yield 'Risk Factors'."""
+    html = (
+        '<p><span style="font-size:14pt">I</span>tem 1A. <span>R</span>isk Factors</p>'
+        "<p>Line one<br>line two</p>"
+    )
+    paras = html_to_paragraphs(html)
+    assert paras[0] == "Item 1A. Risk Factors"
+    assert paras[1] == "Line one line two"
