@@ -4,7 +4,7 @@
 
 ```
 Q: What are Tesla's main risk factors?
-A: I can't answer this from the corpus. company_not_in_corpus: 'Tesla' is not one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, XOM). I won't answer from general knowledge because I can't cite it.
+A: I can't answer this from the corpus. company_not_in_corpus: 'Tesla' is not one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, ORCL, SLB, XOM). I won't answer from general knowledge because I can't cite it.
 Trace:
   - plan: scope guardrail refused (company_not_in_corpus)
 ```
@@ -13,7 +13,7 @@ Trace:
 
 ```
 Q: How does Goldman Sachs describe its cybersecurity risk?
-A: I can't answer this from the corpus. company_not_in_corpus: 'Goldman Sachs' is not one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, XOM). I won't answer from general knowledge because I can't cite it.
+A: I can't answer this from the corpus. company_not_in_corpus: 'Goldman Sachs' is not one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, ORCL, SLB, XOM). I won't answer from general knowledge because I can't cite it.
 Trace:
   - plan: scope guardrail refused (company_not_in_corpus)
 ```
@@ -85,7 +85,7 @@ Trace:
 
 ```
 Q: What are Pfizer's drug-pricing regulatory risks?
-A: I can't answer this from the corpus. company_not_in_corpus: 'Pfizer' is not one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, XOM). I won't answer from general knowledge because I can't cite it.
+A: I can't answer this from the corpus. company_not_in_corpus: 'Pfizer' is not one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, ORCL, SLB, XOM). I won't answer from general knowledge because I can't cite it.
 Trace:
   - plan: scope guardrail refused (company_not_in_corpus)
 ```

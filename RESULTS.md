@@ -5,20 +5,20 @@ re-run the phase that produced a number to change it.
 
 ## Ingestion and extraction
 
-- **companies**: 9
-- **extraction_methods**: item_1a_heading=24, risk_factors_heading=1
-- **failure_rate**: 0.3056
-- **failure_reasons**: section_too_short=11
-- **filings_extracted**: 25
-- **filings_failed**: 11
+- **companies**: 11
+- **extraction_methods**: item_1a_heading=30, risk_factors_heading=1
+- **failure_rate**: 0.1389
+- **failure_reasons**: section_too_short=5
+- **filings_extracted**: 31
+- **filings_failed**: 5
 - **filings_total**: 36
-- **passage_words_mean**: 256.0000
-- **passages_outside_200_400_words**: 54
-- **passages_per_sector**: banking=431, energy=184, technology=429
-- **passages_total**: 1044
+- **passage_words_mean**: 257.1000
+- **passages_outside_200_400_words**: 63
+- **passages_per_sector**: banking=423, energy=235, technology=574
+- **passages_total**: 1232
 - **sectors**: 3
 
-_Recorded 2026-10-06T18:58:49+00:00._
+_Recorded 2026-10-06T19:18:34+00:00._
 
 ## Labelled dataset
 
@@ -26,21 +26,21 @@ _Recorded 2026-10-06T18:58:49+00:00._
 
 | | climate | credit | cyber | market | operational | regulatory |
 |---|---|---|---|---|---|---|
-| climate | 77 | 3 | 11 | 11 | 14 | 45 |
-| credit | 3 | 37 | 5 | 22 | 11 | 11 |
-| cyber | 11 | 5 | 62 | 2 | 30 | 19 |
-| market | 11 | 22 | 2 | 58 | 16 | 13 |
-| operational | 14 | 11 | 30 | 16 | 75 | 25 |
-| regulatory | 45 | 11 | 19 | 13 | 25 | 123 |
+| climate | 93 | 7 | 16 | 15 | 22 | 51 |
+| credit | 7 | 35 | 3 | 21 | 11 | 9 |
+| cyber | 16 | 3 | 63 | 5 | 23 | 24 |
+| market | 15 | 21 | 5 | 50 | 14 | 10 |
+| operational | 22 | 11 | 23 | 14 | 73 | 23 |
+| regulatory | 51 | 9 | 24 | 10 | 23 | 130 |
 
 - **hand_corrected**: 0
 - **keyword_only**: 300
 - **labelled_passages**: 300
-- **mean_labels_per_passage**: 1.4400
-- **passages_with_no_label**: 54
-- **positives_per_category**: climate=77, credit=37, cyber=62, market=58, operational=75, regulatory=123
+- **mean_labels_per_passage**: 1.4800
+- **passages_with_no_label**: 50
+- **positives_per_category**: climate=93, credit=35, cyber=63, market=50, operational=73, regulatory=130
 
-_Recorded 2026-10-06T18:58:49+00:00._
+_Recorded 2026-10-06T19:18:35+00:00._
 
 ## Classical baselines (TF-IDF)
 
@@ -50,49 +50,49 @@ _Recorded 2026-10-06T18:58:49+00:00._
 
 | | f1 | precision | recall | support |
 |---|---|---|---|---|
-| climate | 0.8750 | 0.9333 | 0.8235 | 17 |
-| credit | 0.6667 | 0.8000 | 0.5714 | 7 |
-| cyber | 0.7000 | 0.7778 | 0.6364 | 11 |
-| market | 0.5882 | 0.7143 | 0.5000 | 10 |
-| operational | 0.6364 | 0.7000 | 0.5833 | 12 |
-| regulatory | 0.8364 | 0.8214 | 0.8519 | 27 |
+| climate | 0.8148 | 1.0000 | 0.6875 | 16 |
+| credit | 0.5000 | 0.6000 | 0.4286 | 7 |
+| cyber | 0.4211 | 0.5714 | 0.3333 | 12 |
+| market | 0.3077 | 0.5000 | 0.2222 | 9 |
+| operational | 0.5714 | 0.6667 | 0.5000 | 16 |
+| regulatory | 0.8148 | 0.8148 | 0.8148 | 27 |
 
 **gradient_boosting_per_class**
 
 | | f1 | precision | recall | support |
 |---|---|---|---|---|
-| climate | 1.0000 | 1.0000 | 1.0000 | 17 |
-| credit | 0.6154 | 0.6667 | 0.5714 | 7 |
-| cyber | 0.9524 | 1.0000 | 0.9091 | 11 |
-| market | 0.8000 | 0.8000 | 0.8000 | 10 |
-| operational | 0.6667 | 0.6667 | 0.6667 | 12 |
-| regulatory | 0.8421 | 0.8000 | 0.8889 | 27 |
+| climate | 0.8966 | 1.0000 | 0.8125 | 16 |
+| credit | 0.6667 | 0.8000 | 0.5714 | 7 |
+| cyber | 0.9091 | 1.0000 | 0.8333 | 12 |
+| market | 0.6667 | 0.6667 | 0.6667 | 9 |
+| operational | 0.8148 | 1.0000 | 0.6875 | 16 |
+| regulatory | 0.9057 | 0.9231 | 0.8889 | 27 |
 
 **logreg_ovr_per_class**
 
 | | f1 | precision | recall | support |
 |---|---|---|---|---|
-| climate | 0.8387 | 0.9286 | 0.7647 | 17 |
-| credit | 0.5000 | 0.6000 | 0.4286 | 7 |
-| cyber | 0.7778 | 1.0000 | 0.6364 | 11 |
-| market | 0.8571 | 0.8182 | 0.9000 | 10 |
-| operational | 0.6667 | 0.6000 | 0.7500 | 12 |
-| regulatory | 0.9259 | 0.9259 | 0.9259 | 27 |
+| climate | 0.8276 | 0.9231 | 0.7500 | 16 |
+| credit | 0.7692 | 0.8333 | 0.7143 | 7 |
+| cyber | 0.7619 | 0.8889 | 0.6667 | 12 |
+| market | 0.8235 | 0.8750 | 0.7778 | 9 |
+| operational | 0.6667 | 0.8182 | 0.5625 | 16 |
+| regulatory | 0.8846 | 0.9200 | 0.8519 | 27 |
 
-- **logreg_top_terms**: climate=climate, climate change, energy, emissions, gas, change, carbon, oil, credit=credit, jpmorganchase, clients, collateral, counterparties, losses, market, rating, cyber=systems, security, cybersecurity, cyber, attacks, attack, information, data, market=liquidity, volatility, prices, credit, market, commodity, levels, economic, operational=disruptions, supply, manufacturing, vendors, supply chain, damage, chain, service, regulatory=regulatory, legal, litigation, regulations, compliance, laws, laws regulations, investigations
-- **macro_f1**: decision_tree=0.7171, gradient_boosting=0.8128, logreg_ovr=0.7610
+- **logreg_top_terms**: climate=climate, climate change, emissions, energy, change, gas, carbon, policies, credit=credit, losses, liquidity, market, rating, debt, jpmorganchase, loans, cyber=cybersecurity, security, systems, attacks, incidents, cyber, access, breaches, market=liquidity, volatility, credit, commodity, interest, rates, prices, interest rates, operational=disruptions, supply, manufacturing, chain, supply chain, disruption, vendors, systems, regulatory=regulations, regulatory, laws, litigation, compliance, laws regulations, legal, sanctions
+- **macro_f1**: decision_tree=0.5716, gradient_boosting=0.8099, logreg_ovr=0.7889
 - **n_test**: 60
 - **n_train**: 240
 **summary**
 
 | | hamming_loss | macro_f1 | micro_f1 | n_features | subset_accuracy | train_seconds |
 |---|---|---|---|---|---|---|
-| decision_tree | 0.1056 | 0.7171 | 0.7595 | 8343 | 0.5500 | 0.1000 |
-| gradient_boosting | 0.0750 | 0.8128 | 0.8402 | 8343 | 0.6167 | 6.4900 |
-| logreg_ovr | 0.0861 | 0.7610 | 0.8098 | 8343 | 0.6000 | 0.1100 |
+| decision_tree | 0.1472 | 0.5716 | 0.6536 | 8090 | 0.4000 | 0.1200 |
+| gradient_boosting | 0.0694 | 0.8099 | 0.8447 | 8090 | 0.6333 | 8.3600 |
+| logreg_ovr | 0.0861 | 0.7889 | 0.8050 | 8090 | 0.6333 | 0.1500 |
 
 
-_Recorded 2026-10-06T18:58:58+00:00._
+_Recorded 2026-10-06T19:18:47+00:00._
 
 ## Unsupervised analysis (TF-IDF → SVD → KMeans)
 
@@ -100,98 +100,98 @@ _Recorded 2026-10-06T18:58:58+00:00._
 
 | | dominant_label | sector_mix | size | top_terms |
 |---|---|---|---|---|
-| cluster_0 | regulatory (27/37) | technology:121, banking:10, energy:6 | 137 | laws, regulations, laws regulations, tax, subject, legal, data, products, claims, jurisdictions |
-| cluster_1 | climate (64/98) | energy:162, technology:23, banking:3 | 188 | gas, oil, emissions, energy, climate, production, oil gas, operations, chevron, climate change |
-| cluster_2 | operational (30/74) | technology:232, banking:22, energy:3 | 257 | products, services, product, supply, demand, customers, products services, new, revenue, impact |
-| cluster_3 | market (30/37) | banking:175, technology:9, energy:3 | 187 | credit, market, liquidity, capital, jpmorgan chase, chase, jpmorgan, losses, economic, jpmorganchase |
-| cluster_4 | regulatory (20/23) | banking:153 | 153 | jpmorganchase, chase, jpmorgan chase, jpmorgan, clients, regulatory, clients customers, actions, services, governmental |
-| cluster_5 | cyber (29/31) | banking:68, technology:44, energy:10 | 122 | systems, information, security, parties, access, attacks, data, customers, cyber, jpmorganchase |
+| cluster_0 | regulatory (10/15) | banking:152 | 152 | jpmorganchase, jpmorgan, jpmorgan chase, chase, clients, clients customers, customers, regulatory, operational, actions |
+| cluster_1 | regulatory (45/52) | technology:151, banking:35, energy:31 | 217 | laws, regulations, laws regulations, subject, tax, legal, jurisdictions, regulatory, data, products |
+| cluster_2 | operational (17/39) | technology:218, banking:6 | 224 | products, services, product, new, demand, products services, supply, customers, offerings, cloud |
+| cluster_3 | credit (22/30) | banking:161, technology:8 | 169 | credit, liquidity, market, capital, losses, rates, economic, debt, jpmorganchase, jpmorgan chase |
+| cluster_4 | cyber (31/34) | technology:73, banking:47, energy:22 | 142 | systems, information, security, data, parties, services, incidents, access, cybersecurity, attacks |
+| cluster_5 | climate (68/130) | energy:182, technology:124, banking:22 | 328 | operations, gas, oil, financial, climate, future, emissions, energy, change, oil gas |
 
 - **figure**: notebooks/clusters.png
 - **k**: 6
-- **silhouette**: 0.0458
+- **silhouette**: 0.0444
 - **svd_components**: 100
-- **svd_explained_variance**: 0.3355
+- **svd_explained_variance**: 0.2975
 
-_Recorded 2026-10-06T18:59:01+00:00._
+_Recorded 2026-10-06T19:18:50+00:00._
 
 ## DistilBERT fine-tune
 
 - **batch_size**: 8
 - **device**: cpu
 - **epochs**: 3
-- **inference_ms_per_passage_cpu**: 127.6000
+- **inference_ms_per_passage_cpu**: 163.4000
 - **learning_rate**: 0.0000
 - **max_length**: 256
-- **metrics**: hamming_loss=0.2278, macro_f1=0.6079, micro_f1=0.6339, subset_accuracy=0.1833
+- **metrics**: hamming_loss=0.2389, macro_f1=0.6092, micro_f1=0.6091, subset_accuracy=0.2333
 - **model_size_mb**: 268.8000
 - **parameters**: 66958086
 **per_class**
 
 | | f1 | precision | recall | support |
 |---|---|---|---|---|
-| climate | 0.7805 | 0.6667 | 0.9412 | 17 |
-| credit | 0.4444 | 0.3000 | 0.8571 | 7 |
-| cyber | 0.5517 | 0.4444 | 0.7273 | 11 |
-| market | 0.6429 | 0.5000 | 0.9000 | 10 |
-| operational | 0.4737 | 0.3462 | 0.7500 | 12 |
-| regulatory | 0.7541 | 0.6765 | 0.8519 | 27 |
+| climate | 0.7500 | 0.6250 | 0.9375 | 16 |
+| credit | 0.6316 | 0.5000 | 0.8571 | 7 |
+| cyber | 0.5405 | 0.4000 | 0.8333 | 12 |
+| market | 0.6000 | 0.5455 | 0.6667 | 9 |
+| operational | 0.5000 | 0.3929 | 0.6875 | 16 |
+| regulatory | 0.6333 | 0.5758 | 0.7037 | 27 |
 
-- **pos_weight**: climate=3.0000, credit=7.0000, cyber=3.7100, market=4.0000, operational=2.8100, regulatory=1.5000
+- **pos_weight**: climate=2.1200, credit=7.5700, cyber=3.7100, market=4.8500, operational=3.2100, regulatory=1.3300
 **probability_diagnostics**
 
 | | mean_p | predicted_pos_rate | true_pos_rate |
 |---|---|---|---|
-| climate | 0.4846 | 0.4000 | 0.2833 |
-| credit | 0.4489 | 0.3333 | 0.1167 |
-| cyber | 0.4695 | 0.3000 | 0.1833 |
-| market | 0.4705 | 0.3000 | 0.1667 |
-| operational | 0.4846 | 0.4333 | 0.2000 |
-| regulatory | 0.5195 | 0.5667 | 0.4500 |
+| climate | 0.4843 | 0.4000 | 0.2667 |
+| credit | 0.4128 | 0.2000 | 0.1167 |
+| cyber | 0.4826 | 0.4167 | 0.2000 |
+| market | 0.4372 | 0.1833 | 0.1500 |
+| operational | 0.4873 | 0.4667 | 0.2667 |
+| regulatory | 0.5093 | 0.5500 | 0.4500 |
 
 - **threshold**: 0.5000
 - **torch_threads**: 2
-- **train_seconds**: 289.4000
+- **train_seconds**: 357.7000
 
-_Recorded 2026-10-06T19:04:13+00:00._
+_Recorded 2026-10-06T19:25:17+00:00._
 
 ## Baseline vs transformer (same test split)
 
 - **baseline_model**: gradient_boosting
-- **baseline_train_seconds**: 6.4900
+- **baseline_train_seconds**: 8.3600
 - **classes_where_baseline_wins**: credit, market, operational, regulatory, cyber, climate
-- **distilbert_train_seconds**: 289.4000
+- **distilbert_train_seconds**: 357.7000
 **per_class_f1**
 
 | | delta | distilbert_f1 | gradient_boosting_f1 | support | winner |
 |---|---|---|---|---|---|
-| climate | -0.2195 | 0.7805 | 1.0000 | 17 | gradient_boosting |
-| credit | -0.1710 | 0.4444 | 0.6154 | 7 | gradient_boosting |
-| cyber | -0.4007 | 0.5517 | 0.9524 | 11 | gradient_boosting |
-| macro | -0.2049 | 0.6079 | 0.8128 | 60 | gradient_boosting |
-| market | -0.1571 | 0.6429 | 0.8000 | 10 | gradient_boosting |
-| operational | -0.1930 | 0.4737 | 0.6667 | 12 | gradient_boosting |
-| regulatory | -0.0880 | 0.7541 | 0.8421 | 27 | gradient_boosting |
+| climate | -0.1466 | 0.7500 | 0.8966 | 16 | gradient_boosting |
+| credit | -0.0351 | 0.6316 | 0.6667 | 7 | gradient_boosting |
+| cyber | -0.3686 | 0.5405 | 0.9091 | 12 | gradient_boosting |
+| macro | -0.2007 | 0.6092 | 0.8099 | 60 | gradient_boosting |
+| market | -0.0667 | 0.6000 | 0.6667 | 9 | gradient_boosting |
+| operational | -0.3148 | 0.5000 | 0.8148 | 16 | gradient_boosting |
+| regulatory | -0.2724 | 0.6333 | 0.9057 | 27 | gradient_boosting |
 
 
-_Recorded 2026-10-06T19:04:13+00:00._
+_Recorded 2026-10-06T19:25:17+00:00._
 
 ## Retrieval evaluation
 
 - **dense_weight**: 0.7000
 - **embed_model**: sentence-transformers/all-MiniLM-L6-v2
-- **index**: chunk_overlap_tokens=32, chunk_size_tokens=200, chunks=2408, classifier=distilbert, classify_seconds=136.6000, collection=risk_passages, embed_model=sentence-transformers/all-MiniLM-L6-v2, embed_seconds=75.0000, passages=1044, stored_vectors=2408
+- **index**: chunk_overlap_tokens=32, chunk_size_tokens=200, chunks=2840, classifier=distilbert, classify_seconds=201.3000, collection=risk_passages, embed_model=sentence-transformers/all-MiniLM-L6-v2, embed_seconds=106.2000, passages=1232, stored_vectors=2840
 **metrics**
 
 | | hit_rate@1 | hit_rate@3 | hit_rate@5 | hit_rate@8 | mrr@1 | mrr@3 | mrr@5 | mrr@8 |
 |---|---|---|---|---|---|---|---|---|
-| dense_only | 0.8000 | 0.9333 | 0.9333 | 1.0000 | 0.8000 | 0.8556 | 0.8556 | 0.8639 |
-| dense_plus_rerank | 0.8667 | 1.0000 | 1.0000 | 1.0000 | 0.8667 | 0.9333 | 0.9333 | 0.9333 |
+| dense_only | 0.8235 | 0.9412 | 0.9412 | 1.0000 | 0.8235 | 0.8725 | 0.8725 | 0.8810 |
+| dense_plus_rerank | 0.8824 | 1.0000 | 1.0000 | 1.0000 | 0.8824 | 0.9412 | 0.9412 | 0.9412 |
 
-- **n_questions**: 15
-- **unresolved_questions**: ['r09: Citigroup risks from operating in emerging markets', 'r10: Wells Fargo consent orders and regulatory restrictions on growth', 'r11: Schlumberger geopolitical and international operations risk', 'r12: Oracle data center capacity for cloud services', 'r20: Citigroup reliance on third-party vendors and operational disruptions']
+- **n_questions**: 17
+- **unresolved_questions**: ['r09: Citigroup risks from operating in emerging markets', 'r10: Wells Fargo consent orders and regulatory restrictions on growth', 'r20: Citigroup reliance on third-party vendors and operational disruptions']
 
-_Recorded 2026-10-06T19:07:58+00:00._
+_Recorded 2026-10-06T19:30:40+00:00._
 
 ## Agent and adversarial refusals
 
@@ -228,4 +228,4 @@ _Recorded 2026-10-06T19:07:58+00:00._
 - **demo_questions**: 5
 - **planner**: rule-based
 
-_Recorded 2026-10-06T19:08:05+00:00._
+_Recorded 2026-10-06T19:30:50+00:00._
