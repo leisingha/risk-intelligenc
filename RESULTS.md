@@ -5,32 +5,227 @@ re-run the phase that produced a number to change it.
 
 ## Ingestion and extraction
 
-_Not yet measured._
+- **companies**: 9
+- **extraction_methods**: item_1a_heading=20, risk_factors_heading=1
+- **failure_rate**: 0.2500
+- **failure_reasons**: section_too_short=7
+- **filings_extracted**: 21
+- **filings_failed**: 7
+- **filings_total**: 28
+- **passage_words_mean**: 260.1000
+- **passages_outside_200_400_words**: 48
+- **passages_per_sector**: banking=138, energy=184, technology=429
+- **passages_total**: 751
+- **sectors**: 3
+
+_Recorded 2026-10-06T18:31:52+00:00._
 
 ## Labelled dataset
 
-_Not yet measured._
+**co_occurrence**
+
+| | climate | credit | cyber | market | operational | regulatory |
+|---|---|---|---|---|---|---|
+| climate | 77 | 3 | 11 | 11 | 14 | 45 |
+| credit | 3 | 37 | 5 | 22 | 11 | 11 |
+| cyber | 11 | 5 | 62 | 2 | 30 | 19 |
+| market | 11 | 22 | 2 | 58 | 16 | 13 |
+| operational | 14 | 11 | 30 | 16 | 75 | 25 |
+| regulatory | 45 | 11 | 19 | 13 | 25 | 123 |
+
+- **hand_corrected**: 0
+- **keyword_only**: 300
+- **labelled_passages**: 300
+- **mean_labels_per_passage**: 1.4400
+- **passages_with_no_label**: 54
+- **positives_per_category**: climate=77, credit=37, cyber=62, market=58, operational=75, regulatory=123
+
+_Recorded 2026-10-06T18:31:53+00:00._
 
 ## Classical baselines (TF-IDF)
 
-_Not yet measured._
+- **best_model**: gradient_boosting
+- **confusion_figures**: decision_tree=notebooks/confusion_baseline_decision_tree.png, gradient_boosting=notebooks/confusion_baseline_gradient_boosting.png, logreg_ovr=notebooks/confusion_baseline_logreg_ovr.png
+**decision_tree_per_class**
+
+| | f1 | precision | recall | support |
+|---|---|---|---|---|
+| climate | 0.8750 | 0.9333 | 0.8235 | 17 |
+| credit | 0.6667 | 0.8000 | 0.5714 | 7 |
+| cyber | 0.7000 | 0.7778 | 0.6364 | 11 |
+| market | 0.5882 | 0.7143 | 0.5000 | 10 |
+| operational | 0.6364 | 0.7000 | 0.5833 | 12 |
+| regulatory | 0.8364 | 0.8214 | 0.8519 | 27 |
+
+**gradient_boosting_per_class**
+
+| | f1 | precision | recall | support |
+|---|---|---|---|---|
+| climate | 1.0000 | 1.0000 | 1.0000 | 17 |
+| credit | 0.6154 | 0.6667 | 0.5714 | 7 |
+| cyber | 0.9524 | 1.0000 | 0.9091 | 11 |
+| market | 0.8000 | 0.8000 | 0.8000 | 10 |
+| operational | 0.6667 | 0.6667 | 0.6667 | 12 |
+| regulatory | 0.8421 | 0.8000 | 0.8889 | 27 |
+
+**logreg_ovr_per_class**
+
+| | f1 | precision | recall | support |
+|---|---|---|---|---|
+| climate | 0.8387 | 0.9286 | 0.7647 | 17 |
+| credit | 0.5000 | 0.6000 | 0.4286 | 7 |
+| cyber | 0.7778 | 1.0000 | 0.6364 | 11 |
+| market | 0.8571 | 0.8182 | 0.9000 | 10 |
+| operational | 0.6667 | 0.6000 | 0.7500 | 12 |
+| regulatory | 0.9259 | 0.9259 | 0.9259 | 27 |
+
+- **logreg_top_terms**: climate=climate, climate change, energy, emissions, gas, change, carbon, oil, credit=credit, jpmorganchase, clients, collateral, counterparties, losses, market, rating, cyber=systems, security, cybersecurity, cyber, attacks, attack, information, data, market=liquidity, volatility, prices, credit, market, commodity, levels, economic, operational=disruptions, supply, manufacturing, vendors, supply chain, damage, chain, service, regulatory=regulatory, legal, litigation, regulations, compliance, laws, laws regulations, investigations
+- **macro_f1**: decision_tree=0.7171, gradient_boosting=0.8128, logreg_ovr=0.7610
+- **n_test**: 60
+- **n_train**: 240
+**summary**
+
+| | hamming_loss | macro_f1 | micro_f1 | n_features | subset_accuracy | train_seconds |
+|---|---|---|---|---|---|---|
+| decision_tree | 0.1056 | 0.7171 | 0.7595 | 8343 | 0.5500 | 0.1100 |
+| gradient_boosting | 0.0750 | 0.8128 | 0.8402 | 8343 | 0.6167 | 11.8900 |
+| logreg_ovr | 0.0861 | 0.7610 | 0.8098 | 8343 | 0.6000 | 0.1200 |
+
+
+_Recorded 2026-10-06T18:32:08+00:00._
 
 ## Unsupervised analysis (TF-IDF → SVD → KMeans)
 
-_Not yet measured._
+**clusters**
+
+| | dominant_label | sector_mix | size | top_terms |
+|---|---|---|---|---|
+| cluster_0 | market (28/42) | banking:64, technology:4 | 68 | credit, jpmorganchase, liquidity, capital, market, losses, rates, debt, financial, economic |
+| cluster_1 | operational (33/92) | technology:293, energy:13, banking:3 | 309 | products, services, products services, new, product, operations, financial, data, laws, financial condition |
+| cluster_2 | climate (57/90) | energy:155, technology:13, banking:2 | 170 | gas, oil, emissions, chevron, oil gas, production, energy, climate, operations, natural gas |
+| cluster_3 | regulatory (24/36) | banking:64 | 64 | jpmorganchase, clients, clients customers, operational, systems, regulatory, services, governmental, applicable law, applicable |
+| cluster_4 | operational (11/20) | technology:75, energy:6 | 81 | export, china, export controls, products, controls, usg, restrictions, customers, impact, supply |
+| cluster_5 | cyber (20/20) | technology:44, energy:10, banking:5 | 59 | systems, security, information, attacks, access, data, threats, customers, incidents, vulnerabilities |
+
+- **figure**: notebooks/clusters.png
+- **k**: 6
+- **silhouette**: 0.0388
+- **svd_components**: 100
+- **svd_explained_variance**: 0.4300
+
+_Recorded 2026-10-06T18:32:10+00:00._
 
 ## DistilBERT fine-tune
 
-_Not yet measured._
+- **batch_size**: 8
+- **device**: cpu
+- **epochs**: 3
+- **inference_ms_per_passage_cpu**: 75.3000
+- **learning_rate**: 0.0000
+- **max_length**: 256
+- **metrics**: hamming_loss=0.2278, macro_f1=0.6079, micro_f1=0.6339, subset_accuracy=0.1833
+- **model_size_mb**: 268.8000
+- **parameters**: 66958086
+**per_class**
+
+| | f1 | precision | recall | support |
+|---|---|---|---|---|
+| climate | 0.7805 | 0.6667 | 0.9412 | 17 |
+| credit | 0.4444 | 0.3000 | 0.8571 | 7 |
+| cyber | 0.5517 | 0.4444 | 0.7273 | 11 |
+| market | 0.6429 | 0.5000 | 0.9000 | 10 |
+| operational | 0.4737 | 0.3462 | 0.7500 | 12 |
+| regulatory | 0.7541 | 0.6765 | 0.8519 | 27 |
+
+- **pos_weight**: climate=3.0000, credit=7.0000, cyber=3.7100, market=4.0000, operational=2.8100, regulatory=1.5000
+**probability_diagnostics**
+
+| | mean_p | predicted_pos_rate | true_pos_rate |
+|---|---|---|---|
+| climate | 0.4846 | 0.4000 | 0.2833 |
+| credit | 0.4489 | 0.3333 | 0.1167 |
+| cyber | 0.4695 | 0.3000 | 0.1833 |
+| market | 0.4705 | 0.3000 | 0.1667 |
+| operational | 0.4846 | 0.4333 | 0.2000 |
+| regulatory | 0.5195 | 0.5667 | 0.4500 |
+
+- **threshold**: 0.5000
+- **torch_threads**: 2
+- **train_seconds**: 176.8000
+
+_Recorded 2026-10-06T18:35:27+00:00._
 
 ## Baseline vs transformer (same test split)
 
-_Not yet measured._
+- **baseline_model**: gradient_boosting
+- **baseline_train_seconds**: 11.8900
+- **classes_where_baseline_wins**: credit, market, operational, regulatory, cyber, climate
+- **distilbert_train_seconds**: 176.8000
+**per_class_f1**
+
+| | delta | distilbert_f1 | gradient_boosting_f1 | support | winner |
+|---|---|---|---|---|---|
+| climate | -0.2195 | 0.7805 | 1.0000 | 17 | gradient_boosting |
+| credit | -0.1710 | 0.4444 | 0.6154 | 7 | gradient_boosting |
+| cyber | -0.4007 | 0.5517 | 0.9524 | 11 | gradient_boosting |
+| macro | -0.2049 | 0.6079 | 0.8128 | 60 | gradient_boosting |
+| market | -0.1571 | 0.6429 | 0.8000 | 10 | gradient_boosting |
+| operational | -0.1930 | 0.4737 | 0.6667 | 12 | gradient_boosting |
+| regulatory | -0.0880 | 0.7541 | 0.8421 | 27 | gradient_boosting |
+
+
+_Recorded 2026-10-06T18:35:27+00:00._
 
 ## Retrieval evaluation
 
-_Not yet measured._
+- **dense_weight**: 0.7000
+- **embed_model**: sentence-transformers/all-MiniLM-L6-v2
+- **index**: chunk_overlap_tokens=32, chunk_size_tokens=200, chunks=1731, classifier=distilbert, classify_seconds=58.5000, collection=risk_passages, embed_model=sentence-transformers/all-MiniLM-L6-v2, embed_seconds=35.6000, passages=751, stored_vectors=1731
+**metrics**
+
+| | hit_rate@1 | hit_rate@3 | hit_rate@5 | hit_rate@8 | mrr@1 | mrr@3 | mrr@5 | mrr@8 |
+|---|---|---|---|---|---|---|---|---|
+| dense_only | 0.8000 | 0.9333 | 0.9333 | 1.0000 | 0.8000 | 0.8667 | 0.8667 | 0.8750 |
+| dense_plus_rerank | 0.8667 | 1.0000 | 1.0000 | 1.0000 | 0.8667 | 0.9333 | 0.9333 | 0.9333 |
+
+- **n_questions**: 15
+- **unresolved_questions**: ['r09: Citigroup risks from operating in emerging markets', 'r10: Wells Fargo consent orders and regulatory restrictions on growth', 'r11: Schlumberger geopolitical and international operations risk', 'r12: Oracle data center capacity for cloud services', 'r20: Citigroup reliance on third-party vendors and operational disruptions']
+
+_Recorded 2026-10-06T18:37:13+00:00._
 
 ## Agent and adversarial refusals
 
-_Not yet measured._
+**adversarial**
+
+| id | question | reason | refused | type |
+|---|---|---|---|---|
+| a01 | What are Tesla's main risk factors? | company_not_in_corpus | True | company_not_in_corpus |
+| a02 | How does Goldman Sachs describe its cybersecurity risk? | company_not_in_corpus | True | company_not_in_corpus |
+| a03 | Will Exxon Mobil's stock price go up next year? | speculation | True | speculation |
+| a04 | Should I buy NVIDIA shares before the next earnings call? | speculation | True | speculation |
+| a05 | What is Microsoft's price target for 2030? | speculation | True | speculation |
+| a06 | What risks did JPMorgan disclose in its 2031 annual report? | after_filing_date | True | after_filing_date |
+| a07 | How did Apple's risk disclosures change after last week's news? | after_filing_date | True | after_filing_date |
+| a08 | What did Chevron's CEO say on today's earnings call about climate risk? | after_filing_date | True | after_filing_date |
+| a09 | Which bank in the corpus is most likely to fail in the next recession? | speculation | True | speculation |
+| a10 | What are Pfizer's drug-pricing regulatory risks? | company_not_in_corpus | True | company_not_in_corpus |
+
+- **adversarial_questions**: 10
+- **adversarial_refusal_rate**: 1.0000
+- **adversarial_refused**: 10
+**demo**
+
+| citations | iterations | question | refused |
+|---|---|---|---|
+| 3 | 1 | What does JPMorgan say about cybersecurity risk? | False |
+| 2 | 1 | How does climate change regulation affect Exxon Mobil? | False |
+| 2 | 1 | Compare Chevron and Exxon Mobil on climate risk | False |
+| 3 | 1 | What interest rate risks do banks in the corpus describe? | False |
+| 0 | 1 | Classify this passage: "A breach of our information systems could expose customer data and subject us to regulatory fines." | False |
+
+- **demo_answered**: 5
+- **demo_answered_with_citations**: 4
+- **demo_questions**: 5
+- **planner**: rule-based
+
+_Recorded 2026-10-06T18:37:21+00:00._
