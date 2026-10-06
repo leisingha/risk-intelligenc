@@ -167,6 +167,12 @@ QUERY_STOPWORDS = frozenset(
         "concerning",
         "face",
         "faces",
+        "compare",
+        "comparison",
+        "versus",
+        "between",
+        "differ",
+        "difference",
     }
 )
 

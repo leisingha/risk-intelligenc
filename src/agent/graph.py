@@ -305,13 +305,33 @@ def route_after_plan(state: AgentState) -> str:
 # ---------------------------------------------------------------- answering
 
 
+MAX_QUOTE_WORDS = 60
+
+
 def _sentences(text: str) -> list[str]:
-    parts = re.split(r"(?<=[\.\!\?])\s+", re.sub(r"\s+", " ", text))
+    """Quotable verbatim units: sentences of 8-60 words. Risk factors often run longer,
+    so an overlong sentence is split at semicolons and its clauses offered instead (a
+    clause is still a verbatim substring, so the grounding check holds)."""
+    units: list[str] = []
+    for sent in re.split(r"(?<=[\.\!\?])\s+", re.sub(r"\s+", " ", text)):
+        parts = [sent] if len(sent.split()) <= MAX_QUOTE_WORDS else re.split(r";\s+", sent)
+        units.extend(p.strip() for p in parts)
     return [
-        p.strip()
-        for p in parts
-        if 8 <= len(p.split()) <= 60 and '"' not in p and "“" not in p and "”" not in p
+        u
+        for u in units
+        if 8 <= len(u.split()) <= MAX_QUOTE_WORDS
+        and not any(q in u for q in ('"', "\u201c", "\u201d"))
     ]
+
+
+def _near_duplicate(sentence: str, used: list[str], threshold: float = 0.8) -> bool:
+    """Consecutive 10-Ks repeat risk factors almost verbatim; quote each idea once."""
+    terms = G.content_terms(sentence)
+    for other in used:
+        o = G.content_terms(other)
+        if terms and o and len(terms & o) / len(terms | o) >= threshold:
+            return True
+    return False
 
 
 def _best_sentence(question: str, text: str, aliases: dict[str, list[str]]) -> str | None:
@@ -322,7 +342,10 @@ def _best_sentence(question: str, text: str, aliases: dict[str, list[str]]) -> s
     scored = [(r, s) for r, s in scored if r >= G.MIN_SENTENCE_RELEVANCE]
     if not scored:
         return None
-    return max(scored, key=lambda rs: (rs[0], -abs(len(rs[1].split()) - 25)))[1]
+    # Prefer full sentences (capitalised) over mid-sentence clauses, then ~25 words.
+    return max(scored, key=lambda rs: (rs[0], rs[1][:1].isupper(), -abs(len(rs[1].split()) - 25)))[
+        1
+    ]
 
 
 def compose_rule_answer(state: AgentState) -> str:
@@ -332,7 +355,7 @@ def compose_rule_answer(state: AgentState) -> str:
     for obs in state.get("observations", []):
         hits.extend(_hits_from(obs["result"]))
     aliases = corpus_info()["aliases"]
-    seen, used_sentences, per_company, lines = set(), set(), {}, []
+    seen, used_sentences, per_company, lines = set(), [], {}, []
     limit = 2 if state.get("intent") == "compare" or len({h["ticker"] for h in hits}) > 1 else 3
     for h in sorted(hits, key=lambda h: h["score"], reverse=True):
         if h["passage_id"] in seen or h["score"] < G.MIN_RELEVANCE:
@@ -340,9 +363,9 @@ def compose_rule_answer(state: AgentState) -> str:
         if per_company.get(h["ticker"], 0) >= limit:
             continue
         sentence = _best_sentence(question, h["text"], aliases)
-        if sentence is None or sentence in used_sentences:
+        if sentence is None or _near_duplicate(sentence, used_sentences):
             continue
-        used_sentences.add(sentence)
+        used_sentences.append(sentence)
         seen.add(h["passage_id"])
         per_company[h["ticker"]] = per_company.get(h["ticker"], 0) + 1
         year = str(h["filing_date"])[:4]

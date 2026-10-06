@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 import time
 from dataclasses import asdict, dataclass
 
@@ -19,7 +20,9 @@ from src.config import RAW_DIR, SEC_REQUEST_DELAY_S, sec_user_agent
 log = logging.getLogger(__name__)
 
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
+SUBMISSIONS_PAGE_URL = "https://data.sec.gov/submissions/{name}"
 ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/{document}"
+INDEX_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/index.json"
 
 # 12 companies across 3 sectors. 3 filings each gives 36 filings (spec: 30-40).
 COMPANIES: dict[str, dict[str, str | int]] = {
@@ -103,15 +106,30 @@ class EdgarClient:
         raise RuntimeError(f"Giving up on {url} after {self.max_retries} attempts") from last_error
 
     def recent_10k(self, ticker: str, limit: int) -> list[FilingRef]:
+        """Most recent `limit` 10-Ks. EDGAR's `filings.recent` only holds the latest ~1000
+        filings; large banks file so many other forms that it can contain a single 10-K
+        (pipeline run 5 got one each for JPM, BAC and C). Older filings live in the
+        paginated files listed under `filings.files`, which are read until enough 10-Ks
+        are found."""
         meta = COMPANIES[ticker]
-        resp = self.get(SUBMISSIONS_URL.format(cik=int(meta["cik"])))
-        recent = resp.json()["filings"]["recent"]
+        data = self.get(SUBMISSIONS_URL.format(cik=int(meta["cik"]))).json()
+        refs = self._collect_10k(ticker, data["filings"]["recent"], limit)
+        for page in data["filings"].get("files", []):
+            if len(refs) >= limit:
+                break
+            older = self.get(SUBMISSIONS_PAGE_URL.format(name=page["name"])).json()
+            refs += self._collect_10k(ticker, older, limit - len(refs))
+        return refs
+
+    @staticmethod
+    def _collect_10k(ticker: str, columns: dict, limit: int) -> list[FilingRef]:
+        meta = COMPANIES[ticker]
         refs: list[FilingRef] = []
         for form, acc, date, doc in zip(
-            recent["form"],
-            recent["accessionNumber"],
-            recent["filingDate"],
-            recent["primaryDocument"],
+            columns["form"],
+            columns["accessionNumber"],
+            columns["filingDate"],
+            columns["primaryDocument"],
             strict=True,
         ):
             if form != "10-K":
@@ -134,8 +152,24 @@ class EdgarClient:
             return str(html_path), True
         resp = self.get(ref.url)
         html_path.write_bytes(resp.content)
+        self._download_exhibit_13(ref)
         meta_path.write_text(json.dumps({**asdict(ref), "url": ref.url}, indent=2))
         return str(html_path), False
+
+    def _download_exhibit_13(self, ref: FilingRef) -> None:
+        """Some banks (e.g. Wells Fargo) file a thin 10-K whose Item 1A only points to the
+        "Risk Factors" section of the Annual Report, filed as Exhibit 13. Save it so
+        extraction can fall back to it."""
+        listing = self.get(INDEX_URL.format(cik=ref.cik, accession=ref.accession.replace("-", "")))
+        names = [i["name"] for i in listing.json()["directory"]["item"]]
+        ex13 = [n for n in names if re.search(r"ex-?13", n, re.I) and n.lower().endswith(".htm")]
+        if ex13:
+            resp = self.get(
+                ARCHIVE_URL.format(
+                    cik=ref.cik, accession=ref.accession.replace("-", ""), document=ex13[0]
+                )
+            )
+            (RAW_DIR / f"{ref.raw_path_stem}.ex13.htm").write_bytes(resp.content)
 
 
 def fetch(tickers: list[str], per_company: int) -> list[FilingRef]:

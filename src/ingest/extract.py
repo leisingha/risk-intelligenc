@@ -33,7 +33,8 @@ log = logging.getLogger(__name__)
 
 BLOCK_TAGS = ["p", "div", "li", "td", "h1", "h2", "h3", "h4", "h5", "h6", "tr", "table"]
 MIN_WORDS, MAX_WORDS = 200, 400
-MIN_SECTION_WORDS = 1500  # anything shorter is a TOC entry or a cross-reference
+MIN_SECTION_WORDS = 1500
+THIN_PASSAGES = 15  # fewer than this from a 10-K usually means the wrong span was picked  # anything shorter is a TOC entry or a cross-reference
 
 START_RE = re.compile(r"^\s*item\s*1a\s*[\.\:\-–—]?\s*(risk\s+factors)?\s*\.?\s*$", re.I)
 START_INLINE_RE = re.compile(r"^\s*item\s*1a\s*[\.\:\-–—]?\s*risk\s+factors\b", re.I)
@@ -187,11 +188,46 @@ def pack_passages(paragraphs: list[str]) -> list[str]:
     return passages
 
 
-def extract_file(html_path: Path, meta: dict) -> tuple[list[dict], str]:
-    paragraphs = html_to_paragraphs(html_path.read_bytes())
+HEADING_HINT_RE = re.compile(r"^\s*(item\s*1a|item\s*1b|item\s*1c|item\s*2\b|risk\s+factors)", re.I)
+
+
+def heading_report(paragraphs: list[str], limit: int = 25) -> list[str]:
+    """Every heading-like paragraph with the words that follow it until the next one:
+    printed for failed or thin extractions so the log shows *why*."""
+    hits = [i for i, p in enumerate(paragraphs) if HEADING_HINT_RE.match(p) and len(p) < 200]
+    lines = []
+    for n, i in enumerate(hits[:limit]):
+        nxt = hits[n + 1] if n + 1 < len(hits) else len(paragraphs)
+        lines.append(
+            f"  [{i:>5}] {paragraphs[i][:90]!r} -> {_word_count(paragraphs[i + 1 : nxt])} words"
+        )
+    return lines or ["  (no heading-like paragraphs found)"]
+
+
+def _try_isolate(path: Path) -> tuple[ExtractionResult | None, str, list[str]]:
+    paragraphs = html_to_paragraphs(path.read_bytes())
     if not paragraphs:
-        raise ExtractionError("empty_document")
-    result = isolate_item_1a(paragraphs)
+        return None, "empty_document", []
+    try:
+        return isolate_item_1a(paragraphs), "", paragraphs
+    except ExtractionError as exc:
+        return None, str(exc), paragraphs
+
+
+def extract_file(html_path: Path, meta: dict) -> tuple[list[dict], str]:
+    result, reason, paragraphs = _try_isolate(html_path)
+    ex13 = html_path.with_name(html_path.stem + ".ex13.htm")
+    if ex13.exists():
+        # Keep whichever document yields the longer risk-factor section.
+        ex_result, _, _ = _try_isolate(ex13)
+        if ex_result and (
+            result is None or _word_count(ex_result.paragraphs) > _word_count(result.paragraphs)
+        ):
+            result = ExtractionResult(ex_result.paragraphs, "exhibit_13")
+    if result is None:
+        err = ExtractionError(reason)
+        err.diagnostics = heading_report(paragraphs)
+        raise err
     passages = pack_passages(result.paragraphs)
     year = meta["filing_date"][:4]
     rows = [
@@ -233,10 +269,15 @@ def run_extraction(
             file_rows, method = extract_file(html_path, meta)
         except ExtractionError as exc:
             log.warning("Extraction failed for %s: %s", html_path.name, exc)
+            print(f"Heading candidates in {html_path.name}:")
+            print("\n".join(getattr(exc, "diagnostics", [])))
             log_rows.append(
                 {**entry, "status": "failed", "reason": str(exc), "method": "", "n_passages": 0}
             )
             continue
+        if len(file_rows) < THIN_PASSAGES:
+            print(f"Thin extraction ({len(file_rows)} passages, {method}) for {html_path.name}:")
+            print("\n".join(heading_report(html_to_paragraphs(html_path.read_bytes()))))
         rows.extend(file_rows)
         log_rows.append(
             {**entry, "status": "ok", "reason": "", "method": method, "n_passages": len(file_rows)}

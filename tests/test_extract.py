@@ -57,3 +57,27 @@ def test_extract_file_schema(tmp_path):
 def test_missing_section_fails_loudly(tmp_path):
     with pytest.raises(ExtractionError, match="no_item_1a_heading"):
         isolate_item_1a(["Item 1. Business", "We make things."])
+
+
+THIN_10K = """<html><body>
+<p>Item 1A. Risk Factors</p>
+<p>Information in response to this item can be found in the Risk Factors section of the
+Annual Report, which is incorporated by reference.</p>
+<p>Item 1B. Unresolved Staff Comments</p><p>None.</p></body></html>"""
+
+
+def test_falls_back_to_exhibit_13(tmp_path):
+    primary = tmp_path / "WFC_2025-02-25_x.htm"
+    primary.write_text(THIN_10K)
+    primary.with_name(primary.stem + ".ex13.htm").write_bytes(FIXTURE.read_bytes())
+    rows, method = extract_file(primary, {**META, "ticker": "WFC"})
+    assert method == "exhibit_13" and len(rows) >= 5
+
+
+def test_failure_carries_heading_diagnostics(tmp_path):
+    primary = tmp_path / "WFC_2025-02-25_x.htm"
+    primary.write_text(THIN_10K)
+    with pytest.raises(ExtractionError, match="section_too_short") as info:
+        extract_file(primary, {**META, "ticker": "WFC"})
+    report = "\n".join(info.value.diagnostics)
+    assert "Item 1A. Risk Factors" in report and "Item 1B" in report
