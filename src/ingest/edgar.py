@@ -174,7 +174,11 @@ class EdgarClient:
             log.info(
                 "No Exhibit 13 among %s files: %s",
                 ref.raw_path_stem,
-                [n for n in names if n.lower().endswith((".htm", ".html"))][:15],
+                [
+                    n
+                    for n in names
+                    if n.lower().endswith((".htm", ".html")) and not re.fullmatch(r"R\d+\.htm", n)
+                ][:15],
             )
         if ex13:
             resp = self.get(

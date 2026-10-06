@@ -9,12 +9,11 @@ It indexes the passages in Chroma via LlamaIndex, and a LangGraph agent answers
 questions with verbatim, `passage_id`-cited quotes. When it can't ground an answer,
 it **refuses**.
 
-> **Status:** all code, tests (37, offline), CI and Docker are in place. The data
-> phases (EDGAR download, labelling, training, retrieval and agent evaluation) have
-> **not been run yet**. The build environment's network blocks `sec.gov` and
-> `huggingface.co`. RESULTS.md therefore reads "Not yet measured" everywhere. No
-> number in this repository is invented. Run `./run_pipeline.sh` with network access
-> to produce them.
+> **Status:** built and run end to end on real SEC filings (pipeline run 8): 36 10-Ks
+> fetched for 12 companies, 33 extracted (8% failure rate, all Wells Fargo), 1,382
+> passages, 3,183 indexed chunks. Every number below is copied from
+> [RESULTS.md](RESULTS.md), which the measuring code writes. The labels are still
+> keyword-generated, not hand-corrected; see the caveats under Results.
 
 ## Architecture
 
@@ -50,17 +49,80 @@ All numbers live in [RESULTS.md](RESULTS.md), generated from `results.json` by t
 code that measured them. Figures are written to `notebooks/` by `python -m src.report`
 and shown in `notebooks/analysis.ipynb`.
 
-| Measurement | Where |
-|---|---|
-| Per-class P/R/F1, macro-F1: LogReg, Decision Tree, Gradient Boosting | RESULTS.md → *Classical baselines* |
-| Same metrics for DistilBERT, plus training time, model size, CPU latency | RESULTS.md → *DistilBERT fine-tune* |
-| Per-class winner, **including classes where the baseline wins** | RESULTS.md → *Baseline vs transformer* (`classes_where_baseline_wins`) |
-| Hit rate and MRR @1/3/5/8, dense vs dense+rerank | RESULTS.md → *Retrieval evaluation* |
-| Refusal rate on 10 adversarial questions | RESULTS.md → *Agent* |
-| Cluster top terms, sector mix, dominant label | RESULTS.md → *Unsupervised analysis* |
+### Data
 
-_The tables above get their values when the pipeline runs. This README will quote
-them, with the honest per-class finding, once they exist._
+| | |
+|---|---|
+| 10-K filings fetched / extracted | 36 / 33 (failure rate 8.3%: all three Wells Fargo filings, whose 10-K only cross-references its Annual Report) |
+| Companies / sectors | 11 / 3 (banking, energy, technology) |
+| Risk-factor passages | 1,382 (200–400 words, split on paragraph boundaries) |
+| Labelled passages | 300 (240 train / 60 test, fixed seed-42 split); **all keyword-generated, 0 hand-corrected** |
+| Positives per category | regulatory 130, climate 93, operational 73, cyber 63, market 50, credit 35 |
+
+### Classification: baseline vs transformer (same 60-passage test split)
+
+| Model | macro-F1 | micro-F1 | subset accuracy | train time (CPU) |
+|---|---|---|---|---|
+| TF-IDF + gradient boosting | **0.810** | 0.845 | 0.633 | 7.6 s |
+| TF-IDF + logistic regression | 0.789 | 0.805 | 0.633 | 0.1 s |
+| TF-IDF + decision tree | 0.572 | 0.654 | 0.400 | 0.1 s |
+| DistilBERT (fine-tuned) | 0.609 | 0.609 | 0.233 | 359 s, 269 MB, 132 ms/passage |
+
+Per-class F1, best baseline vs DistilBERT:
+
+| Class | Gradient boosting | DistilBERT | Δ | Test positives |
+|---|---|---|---|---|
+| climate | 0.897 | 0.750 | −0.147 | 16 |
+| credit | 0.667 | 0.632 | −0.035 | 7 |
+| cyber | 0.909 | 0.540 | −0.369 | 12 |
+| market | 0.667 | 0.600 | −0.067 | 9 |
+| operational | 0.815 | 0.500 | −0.315 | 16 |
+| regulatory | 0.906 | 0.633 | −0.272 | 27 |
+
+**The baseline beats DistilBERT on every class.** Two reasons, both visible in the
+numbers, and neither is "transformers are worse at this":
+
+1. **The labels are keyword-generated.** TF-IDF can nearly re-learn the labelling
+   rules: its top cyber features are *cybersecurity, security, systems, attacks*, the
+   rule's own vocabulary. The comparison partly measures who copies the labeller
+   best. Hand-corrected labels are needed for a fair test of semantic understanding.
+2. **DistilBERT is undertrained at the spec's fixed budget.** 3 epochs × 240 passages
+   at batch 8 is 90 optimiser steps. Its probabilities cluster near 0.5 (mean P per
+   class 0.41–0.51), and it over-predicts: e.g. operational is predicted for 47% of
+   test passages against a true rate of 27%. The first run without positive-class
+   weighting collapsed to predicting nothing (macro-F1 ≈ 0.02); see DECISIONS.md.
+
+Also note that 60 test passages is small: credit has 7 positives, so one passage moves
+its F1 by roughly 0.1.
+
+### Unsupervised: TF-IDF → SVD(100) → KMeans(k=6)
+
+Silhouette 0.04 (weak separation); SVD keeps 27.5% of variance. The clusters
+partly match risk types (a cross-sector **cyber** cluster, 30/31 labelled passages
+cyber; an energy **climate/oil & gas** cluster; a bank **rates/credit/liquidity**
+cluster). Two clusters track the *issuer* instead (one JPMorgan, one Citi),
+because each bank's boilerplate dominates its vocabulary. The same effect shows up in
+the classifier, where `jpmorganchase` is a top credit feature.
+
+### Retrieval (19 of 20 hand-written questions; the Wells Fargo one can't resolve)
+
+| | hit@1 | hit@3 | hit@5 | hit@8 | MRR@8 |
+|---|---|---|---|---|---|
+| Dense only (MiniLM, Chroma) | 0.842 | 0.947 | 0.947 | 1.000 | 0.894 |
+| Dense + lexical rerank | **0.895** | **1.000** | 1.000 | 1.000 | **0.947** |
+
+Reranking (0.7·dense + 0.3·idf-weighted query-term coverage) fixes one rank-1 miss
+and pulls every expected passage into the top 3. Expected passages come from rules
+(ticker + required terms) resolved against the corpus, not hand-picked IDs. With 19 questions, each one is ~0.05
+of hit rate, so treat the gap as indicative, not significant.
+
+### Agent
+
+| | |
+|---|---|
+| Adversarial questions refused | **10 / 10** (4 speculation, 3 after filing date, 3 company not in corpus) |
+| Demo questions answered | 5 / 5; 4 with passage-cited verbatim quotes, 1 classifier answer (nothing to cite) |
+| Planner | rule-based (no OpenAI key); LLM path implemented, not exercised |
 
 ## Design notes
 
@@ -98,33 +160,44 @@ Every answer sentence carries `[passage_id]`.
 
 ## Sample transcripts
 
-The transcripts below come from the **synthetic offline test corpus** in
-`tests/fixtures/` (invented text, not real filings), so they show the mechanics only.
-Transcripts on the real corpus are written to `data/eval/demo_transcript.md` and
-`data/eval/adversarial_transcript.md` by `python -m src.agent.graph --demo --adversarial`.
+From the real corpus (pipeline run 8). The full transcripts are in
+`data/eval/demo_transcript.md` and `data/eval/adversarial_transcript.md`.
 
 ```
-Q: What does JPMorgan say about cybersecurity risk?
-A: JPMorgan Chase & Co. (2024 10-K) states: "Cyberattacks could compromise the
-   security of our information systems." [JPM-2024-004]
+Q: What interest rate risks do banks in the corpus describe?
+A: Bank of America Corp (2025 10-K) states: "Monetary policy has contributed to and
+   may continue to result in elevated market interest rates and a flat and/or inverted
+   yield curve." [BAC-2025-002] ...
+Citations: BAC-2025-002, BAC-2024-004, BAC-2024-002
 Trace:
-  - plan (rule-based): intent=search; calls=search_risk_disclosures(query=..., company='JPM')
-  - act: search_risk_disclosures(query=..., company='JPM')
-  - observe: 8 passages, best ... (JPM-2024-004, JPMorgan Chase & Co.)
+  - plan (rule-based): intent=search; calls=search_risk_disclosures(query=..., sector='banking')
+  - act: search_risk_disclosures(query=..., sector='banking')
+  - observe: 8 passages, best 0.798 (BAC-2025-002, Bank of America Corp)
   - reflect: evidence gathered → answer
-  - answer: grounded, 1 citation(s)
+  - answer: grounded, 3 citation(s)
+```
 
+```
+Q: How does Goldman Sachs describe its cybersecurity risk?
+A: I can't answer this from the corpus. company_not_in_corpus: 'Goldman Sachs' is not
+   one of the companies in the corpus (AAPL, BAC, C, COP, CVX, JPM, MSFT, NVDA, ORCL,
+   SLB, XOM). I won't answer from general knowledge because I can't cite it.
+Trace:
+  - plan: scope guardrail refused (company_not_in_corpus)
+```
+
+```
 Q: Which bank in the corpus is most likely to fail in the next recession?
 A: I can't answer this from the corpus. speculation: This asks for a prediction or
    investment advice. Risk-factor disclosures describe what could go wrong; they do
    not support forecasts of prices or outcomes.
 Trace:
   - plan: scope guardrail refused (speculation)
-
-Q: What does Apple say about deep-sea mining permits?
-A: I can't answer this from the corpus. insufficient_evidence: the retrieved passages
-   do not contain a statement that answers the question.
 ```
+
+A visible weakness: the extractive composer can quote a mid-sentence clause (one
+Chevron climate quote starts "and epidemic or pandemic diseases, …"). It is verbatim
+and grounded, but reads poorly. An LLM composer, or sentence-level reranking, would fix it.
 
 ## How to run
 
@@ -159,8 +232,14 @@ Tests and lint (offline: hashing embeddings, no model downloads, no EDGAR):
 
 These are the honest limitations:
 
-- **300 labels, of which the hand-corrected share is reported**: enough to compare
-  models, too few to tune thresholds or give tight confidence intervals.
+- **Hand-correct the 300 labels** (currently 0 corrected). This is the single biggest
+  improvement: it turns the baseline-vs-DistilBERT comparison from "who copies the
+  keyword labeller" into a real test. Then add a validation split to tune
+  thresholds and give confidence intervals.
+- **Wells Fargo** (3 filings) still fails: its 10-K only cross-references the Annual
+  Report exhibit, which the fetcher hasn't located yet.
+- **DistilBERT at the spec's 90 steps is undertrained.** More epochs on hand-corrected
+  labels, early-stopped on a validation split, is the fair comparison.
 - **Lexical grounding** can't see negation. A paraphrase that flips meaning while
   reusing the passage's words would pass. Verbatim quoting is the current
   mitigation; NLI entailment is the fix.
