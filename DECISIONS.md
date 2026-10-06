@@ -11,6 +11,8 @@ Every choice made while building this, with the reasoning. Where the spec said
 | **H2 answered "no key"** | No OpenAI key was provided. The agent runs on the deterministic rule-based planner and an extractive answer composer. The LLM path (`langchain-openai`) is implemented and switches on when `OPENAI_API_KEY` is set. It has not been exercised against the live API. |
 | **Code first, data later** | The build container's network policy blocks `data.sec.gov`, `www.sec.gov` and `huggingface.co`. Every module is written and tested offline on synthetic fixtures. The data-dependent phases run with `./run_pipeline.sh` once those hosts are reachable. Until then RESULTS.md says "Not yet measured" rather than showing invented numbers. |
 | **`results.json` → generated RESULTS.md** | Spec rule 9: numbers must come from a file, not from memory. Each phase calls `src/results.py:record()`, which re-renders RESULTS.md, so a typed-in number cannot reach the docs. |
+| **Added `accelerate==0.34.2`**, the one dependency outside Section 4 | The spec requires the `transformers` Trainer API, and `Trainer` refuses to run without `accelerate>=0.21` (pipeline run 3 failed on exactly this). 0.34.2 is the release matched to `transformers==4.44.2`/`torch==2.4.1`. The alternative, a hand-written training loop, would have broken the "use the Trainer API" requirement instead. |
+| **Data phases run in GitHub Actions** (`pipeline.yml`) | The sandbox can't reach SEC or Hugging Face; GitHub runners can. The SEC contact email comes from a repository secret, never from the repo or workflow inputs. Results are committed back by the workflow. |
 | **Docker build verified in CI, not locally** | The sandbox's TLS-intercepting proxy is untrusted inside build containers. The Dockerfile is kept clean (no sandbox CA hacks), and GitHub Actions builds it. |
 
 ## Data
@@ -80,4 +82,5 @@ Every choice made while building this, with the reasoning. Where the spec said
 3. **NLI-based grounding** (claim ⇒ entailed by passage) instead of lexical support for LLM paraphrases. Lexical support can't see negation.
 4. **NER for the scope check**, instead of the capitalisation heuristic.
 5. **Year-aware retrieval** (filter or boost by filing year), since the corpus has three filings per company.
-6. **Hand-pinned retrieval answers** for every eval item, replacing the rules.
+6. **Strip company self-references from classifier features.** The first real run shows `jpmorganchase` among the top LogReg features for *credit*: the model partly learns "which company" as a proxy for "which risk", which won't transfer to new filers.
+7. **Hand-pinned retrieval answers** for every eval item, replacing the rules.

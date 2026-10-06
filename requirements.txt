@@ -6,6 +6,7 @@ numpy==1.26.4
 scikit-learn==1.5.2
 torch==2.4.1
 transformers==4.44.2
+accelerate==0.34.2
 datasets==3.0.0
 sentence-transformers==3.1.1
 chromadb==0.5.5
