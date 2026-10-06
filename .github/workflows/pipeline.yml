@@ -58,8 +58,8 @@ jobs:
           if-no-files-found: warn
       - name: Commit results
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "leisingha"
+          git config user.email "120764124+leisingha@users.noreply.github.com"
           git add results.json RESULTS.md notebooks/*.png data/labels data/processed \
                   data/eval/*_transcript.md
           git commit -m "Record pipeline results (run ${{ github.run_id }})" || echo "nothing to commit"
