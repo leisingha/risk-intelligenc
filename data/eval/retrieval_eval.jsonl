@@ -1,0 +1,20 @@
+{"id": "r01", "question": "JPMorgan Chase cyberattack risk to its systems and operations", "expected_rule": {"ticker": "JPM", "all_terms": ["cyber"]}}
+{"id": "r02", "question": "Exxon Mobil greenhouse gas emissions regulation", "expected_rule": {"ticker": "XOM", "all_terms": ["greenhouse gas"]}}
+{"id": "r03", "question": "How do changes in interest rates affect Bank of America's net interest income?", "expected_rule": {"ticker": "BAC", "all_terms": ["interest rate", "net interest income"]}}
+{"id": "r04", "question": "Apple dependence on outsourcing partners and supply chain disruptions", "expected_rule": {"ticker": "AAPL", "all_terms": ["supply chain|outsourcing partner"]}}
+{"id": "r05", "question": "NVIDIA export controls on sales of chips to China", "expected_rule": {"ticker": "NVDA", "all_terms": ["export control", "china"]}}
+{"id": "r06", "question": "Microsoft risks from developing artificial intelligence", "expected_rule": {"ticker": "MSFT", "all_terms": ["artificial intelligence|\\bAI\\b"]}}
+{"id": "r07", "question": "Chevron exposure to crude oil and natural gas price volatility", "expected_rule": {"ticker": "CVX", "all_terms": ["crude oil|oil and gas", "price"]}}
+{"id": "r08", "question": "ConocoPhillips commodity price fluctuations and its cash flows", "expected_rule": {"ticker": "COP", "all_terms": ["commodity price|prices for crude oil"]}}
+{"id": "r09", "question": "Citigroup risks from operating in emerging markets", "expected_rule": {"ticker": "C", "all_terms": ["emerging market"]}}
+{"id": "r10", "question": "Wells Fargo consent orders and regulatory restrictions on growth", "expected_rule": {"ticker": "WFC", "all_terms": ["consent order"]}}
+{"id": "r11", "question": "Schlumberger geopolitical and international operations risk", "expected_rule": {"ticker": "SLB", "all_terms": ["geopolitic|international operations"]}}
+{"id": "r12", "question": "Oracle data center capacity for cloud services", "expected_rule": {"ticker": "ORCL", "all_terms": ["data center", "cloud"]}}
+{"id": "r13", "question": "Apple manufacturing concentration in China and trade tensions", "expected_rule": {"ticker": "AAPL", "all_terms": ["china", "tariff|trade"]}}
+{"id": "r14", "question": "JPMorgan capital and liquidity requirements under banking regulation", "expected_rule": {"ticker": "JPM", "all_terms": ["capital", "liquidity", "requirement"]}}
+{"id": "r15", "question": "Bank of America credit losses on consumer and commercial loans", "expected_rule": {"ticker": "BAC", "all_terms": ["credit loss|credit quality", "loan"]}}
+{"id": "r16", "question": "Exxon Mobil energy transition and lower demand for oil", "expected_rule": {"ticker": "XOM", "all_terms": ["energy transition|lower-emission|net zero"]}}
+{"id": "r17", "question": "NVIDIA reliance on Taiwan manufacturing partners", "expected_rule": {"ticker": "NVDA", "all_terms": ["taiwan"]}}
+{"id": "r18", "question": "Microsoft nation-state cyberattacks and security vulnerabilities", "expected_rule": {"ticker": "MSFT", "all_terms": ["nation-state|state-sponsored", "cyber|security"]}}
+{"id": "r19", "question": "Chevron climate change litigation", "expected_rule": {"ticker": "CVX", "all_terms": ["climate", "litigation|lawsuit"]}}
+{"id": "r20", "question": "Citigroup reliance on third-party vendors and operational disruptions", "expected_rule": {"ticker": "C", "all_terms": ["third part", "operational|disruption"]}}

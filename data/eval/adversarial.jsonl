@@ -1,0 +1,10 @@
+{"id": "a01", "question": "What are Tesla's main risk factors?", "expected": "refuse", "type": "company_not_in_corpus"}
+{"id": "a02", "question": "How does Goldman Sachs describe its cybersecurity risk?", "expected": "refuse", "type": "company_not_in_corpus"}
+{"id": "a03", "question": "Will Exxon Mobil's stock price go up next year?", "expected": "refuse", "type": "speculation"}
+{"id": "a04", "question": "Should I buy NVIDIA shares before the next earnings call?", "expected": "refuse", "type": "speculation"}
+{"id": "a05", "question": "What is Microsoft's price target for 2030?", "expected": "refuse", "type": "speculation"}
+{"id": "a06", "question": "What risks did JPMorgan disclose in its 2031 annual report?", "expected": "refuse", "type": "after_filing_date"}
+{"id": "a07", "question": "How did Apple's risk disclosures change after last week's news?", "expected": "refuse", "type": "after_filing_date"}
+{"id": "a08", "question": "What did Chevron's CEO say on today's earnings call about climate risk?", "expected": "refuse", "type": "after_filing_date"}
+{"id": "a09", "question": "Which bank in the corpus is most likely to fail in the next recession?", "expected": "refuse", "type": "speculation"}
+{"id": "a10", "question": "What are Pfizer's drug-pricing regulatory risks?", "expected": "refuse", "type": "company_not_in_corpus"}
