@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from src.config import CATEGORIES, CLASSIFIER_BASE, DISTILBERT_DIR, SEED
-from src.models.evaluate import compute_metrics, compare_per_class, format_table, plot_confusion
+from src.models.evaluate import compare_per_class, compute_metrics, format_table, plot_confusion
 from src.nlp.preprocess import label_matrix, load_labelled, load_split
 
 MAX_LENGTH = 256
@@ -27,10 +27,14 @@ THRESHOLD = 0.5
 def _dataset(df: pd.DataFrame, tokenizer):
     from datasets import Dataset
 
-    ds = Dataset.from_dict({"text": df.text.tolist(),
-                            "labels": label_matrix(df).astype(np.float32).tolist()})
-    return ds.map(lambda b: tokenizer(b["text"], truncation=True, max_length=MAX_LENGTH),
-                  batched=True, remove_columns=["text"])
+    ds = Dataset.from_dict(
+        {"text": df.text.tolist(), "labels": label_matrix(df).astype(np.float32).tolist()}
+    )
+    return ds.map(
+        lambda b: tokenizer(b["text"], truncation=True, max_length=MAX_LENGTH),
+        batched=True,
+        remove_columns=["text"],
+    )
 
 
 def _dir_size_mb(path: Path) -> float:
@@ -72,8 +76,12 @@ def train(train_df: pd.DataFrame, out_dir: Path = DISTILBERT_DIR) -> dict:
         report_to=[],
         use_cpu=True,
     )
-    trainer = Trainer(model=model, args=args, train_dataset=_dataset(train_df, tokenizer),
-                      data_collator=DataCollatorWithPadding(tokenizer))
+    trainer = Trainer(
+        model=model,
+        args=args,
+        train_dataset=_dataset(train_df, tokenizer),
+        data_collator=DataCollatorWithPadding(tokenizer),
+    )
     t0 = time.perf_counter()
     trainer.train()
     seconds = time.perf_counter() - t0
@@ -82,7 +90,10 @@ def train(train_df: pd.DataFrame, out_dir: Path = DISTILBERT_DIR) -> dict:
     tokenizer.save_pretrained(str(out_dir))
     return {
         "train_seconds": round(seconds, 1),
-        "epochs": 3, "batch_size": 8, "learning_rate": 2e-5, "max_length": MAX_LENGTH,
+        "epochs": 3,
+        "batch_size": 8,
+        "learning_rate": 2e-5,
+        "max_length": MAX_LENGTH,
         "parameters": int(sum(p.numel() for p in model.parameters())),
         "model_size_mb": round(_dir_size_mb(out_dir), 1),
         "device": "cpu",
@@ -98,8 +109,9 @@ class DistilBertClassifier:
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
         if not (model_dir / "config.json").exists():
-            raise FileNotFoundError(f"No fine-tuned model at {model_dir}; run "
-                                    "`python -m src.models.finetune` first")
+            raise FileNotFoundError(
+                f"No fine-tuned model at {model_dir}; run " "`python -m src.models.finetune` first"
+            )
         self.torch = torch
         self.tokenizer = AutoTokenizer.from_pretrained(str(model_dir))
         self.model = AutoModelForSequenceClassification.from_pretrained(str(model_dir)).eval()
@@ -108,8 +120,13 @@ class DistilBertClassifier:
         out = []
         with self.torch.no_grad():
             for i in range(0, len(texts), batch_size):
-                enc = self.tokenizer(texts[i : i + batch_size], truncation=True,
-                                     max_length=MAX_LENGTH, padding=True, return_tensors="pt")
+                enc = self.tokenizer(
+                    texts[i : i + batch_size],
+                    truncation=True,
+                    max_length=MAX_LENGTH,
+                    padding=True,
+                    return_tensors="pt",
+                )
                 logits = self.model(**enc).logits
                 out.append(self.torch.sigmoid(logits).cpu().numpy())
         return np.vstack(out) if out else np.zeros((0, len(CATEGORIES)))
@@ -129,8 +146,9 @@ def evaluate(test_df: pd.DataFrame) -> tuple[dict, float]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--eval-only", action="store_true",
-                        help="Evaluate the saved model on the saved test split")
+    parser.add_argument(
+        "--eval-only", action="store_true", help="Evaluate the saved model on the saved test split"
+    )
     args = parser.parse_args()
     from src.results import load, record, update
 
@@ -140,8 +158,10 @@ def main() -> None:
 
     if not args.eval_only:
         info = train(train_df)
-        print(f"Training took {info['train_seconds']}s; model {info['model_size_mb']} MB, "
-              f"{info['parameters']:,} parameters")
+        print(
+            f"Training took {info['train_seconds']}s; model {info['model_size_mb']} MB, "
+            f"{info['parameters']:,} parameters"
+        )
         record("transformer", info)
 
     previous = load().get("transformer", {}).get("metrics")
@@ -149,34 +169,47 @@ def main() -> None:
     if args.eval_only and previous is not None:
         current = {k: metrics[k] for k in previous}
         status = "MATCH" if current == previous else "DIFFERS"
-        print(f"Reproducibility vs RESULTS.md: {status}\n  recorded {previous}\n  now      {current}")
-    update("transformer", {"metrics": {k: metrics[k] for k in
-                                       ["macro_f1", "micro_f1", "subset_accuracy", "hamming_loss"]},
-                           "per_class": metrics["per_class"],
-                           "inference_ms_per_passage_cpu": round(ms, 1),
-                           "threshold": THRESHOLD})
+        print(
+            f"Reproducibility vs RESULTS.md: {status}\n  recorded {previous}\n  now      {current}"
+        )
+    update(
+        "transformer",
+        {
+            "metrics": {
+                k: metrics[k] for k in ["macro_f1", "micro_f1", "subset_accuracy", "hamming_loss"]
+            },
+            "per_class": metrics["per_class"],
+            "inference_ms_per_passage_cpu": round(ms, 1),
+            "threshold": THRESHOLD,
+        },
+    )
 
     baseline = load().get("baseline")
     if baseline is None:
         print(format_table({"distilbert": metrics}))
         return
     best = baseline["best_model"]
-    base_metrics = {"per_class": baseline[f"{best}_per_class"],
-                    "macro_f1": baseline["macro_f1"][best],
-                    "micro_f1": baseline["summary"][best]["micro_f1"],
-                    "subset_accuracy": baseline["summary"][best]["subset_accuracy"],
-                    "hamming_loss": baseline["summary"][best]["hamming_loss"],
-                    "n_test": metrics["n_test"]}
+    base_metrics = {
+        "per_class": baseline[f"{best}_per_class"],
+        "macro_f1": baseline["macro_f1"][best],
+        "micro_f1": baseline["summary"][best]["micro_f1"],
+        "subset_accuracy": baseline["summary"][best]["subset_accuracy"],
+        "hamming_loss": baseline["summary"][best]["hamming_loss"],
+        "n_test": metrics["n_test"],
+    }
     print(format_table({best: base_metrics, "distilbert": metrics}))
     comparison = compare_per_class(base_metrics, metrics, best)
     baseline_wins = [c for c in CATEGORIES if comparison[c]["winner"] == best]
-    record("comparison", {
-        "baseline_model": best,
-        "per_class_f1": comparison,
-        "classes_where_baseline_wins": ", ".join(baseline_wins) or "none",
-        "baseline_train_seconds": baseline["summary"][best]["train_seconds"],
-        "distilbert_train_seconds": load()["transformer"].get("train_seconds", "n/a"),
-    })
+    record(
+        "comparison",
+        {
+            "baseline_model": best,
+            "per_class_f1": comparison,
+            "classes_where_baseline_wins": ", ".join(baseline_wins) or "none",
+            "baseline_train_seconds": baseline["summary"][best]["train_seconds"],
+            "distilbert_train_seconds": load()["transformer"].get("train_seconds", "n/a"),
+        },
+    )
     if baseline_wins:
         print(f"\nBaseline ({best}) beats DistilBERT on: {', '.join(baseline_wins)}")
 

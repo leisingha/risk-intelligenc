@@ -28,7 +28,9 @@ class BaselineClassifier:
 
     def __init__(self, path: Path = BASELINE_MODEL_PATH) -> None:
         if not path.exists():
-            raise FileNotFoundError(f"No baseline model at {path}; run `python -m src.nlp.baseline`")
+            raise FileNotFoundError(
+                f"No baseline model at {path}; run `python -m src.nlp.baseline`"
+            )
         self.pipe = joblib.load(path)
 
     def predict_proba(self, texts: list[str]) -> np.ndarray:

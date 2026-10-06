@@ -63,4 +63,5 @@ jobs:
           git add results.json RESULTS.md notebooks/*.png data/labels data/processed \
                   data/eval/*_transcript.md
           git commit -m "Record pipeline results (run ${{ github.run_id }})" || echo "nothing to commit"
-          git push
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

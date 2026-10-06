@@ -20,16 +20,21 @@ from sklearn.metrics import (  # noqa: E402
 from src.config import CATEGORIES, NOTEBOOKS_DIR  # noqa: E402
 
 
-def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray,
-                    categories: list[str] = CATEGORIES) -> dict:
+def compute_metrics(
+    y_true: np.ndarray, y_pred: np.ndarray, categories: list[str] = CATEGORIES
+) -> dict:
     y_true = np.asarray(y_true, dtype=int)
     y_pred = np.asarray(y_pred, dtype=int)
     if y_true.shape != y_pred.shape:
         raise ValueError(f"Shape mismatch: y_true {y_true.shape} vs y_pred {y_pred.shape}")
     p, r, f, s = precision_recall_fscore_support(y_true, y_pred, average=None, zero_division=0)
     per_class = {
-        cat: {"precision": round(float(p[i]), 4), "recall": round(float(r[i]), 4),
-              "f1": round(float(f[i]), 4), "support": int(s[i])}
+        cat: {
+            "precision": round(float(p[i]), 4),
+            "recall": round(float(r[i]), 4),
+            "f1": round(float(f[i]), 4),
+            "support": int(s[i]),
+        }
         for i, cat in enumerate(categories)
     }
     return {
@@ -61,16 +66,24 @@ def format_table(metrics_by_model: dict[str, dict]) -> str:
     return "\n".join(lines)
 
 
-def plot_confusion(y_true: np.ndarray, y_pred: np.ndarray, title: str,
-                   out_path: Path | None = None) -> Path:
+def plot_confusion(
+    y_true: np.ndarray, y_pred: np.ndarray, title: str, out_path: Path | None = None
+) -> Path:
     """One 2x2 confusion matrix per category (multi-label has no single NxN matrix)."""
     cms = multilabel_confusion_matrix(np.asarray(y_true, int), np.asarray(y_pred, int))
     fig, axes = plt.subplots(2, 3, figsize=(10, 6.5))
     for ax, cat, cm in zip(axes.flat, CATEGORIES, cms, strict=True):
         ax.imshow(cm, cmap="Blues")
         for (i, j), v in np.ndenumerate(cm):
-            ax.text(j, i, str(v), ha="center", va="center",
-                    color="white" if v > cm.max() / 2 else "black", fontsize=12)
+            ax.text(
+                j,
+                i,
+                str(v),
+                ha="center",
+                va="center",
+                color="white" if v > cm.max() / 2 else "black",
+                fontsize=12,
+            )
         ax.set_title(cat)
         ax.set_xticks([0, 1], ["pred 0", "pred 1"])
         ax.set_yticks([0, 1], ["true 0", "true 1"])
@@ -90,13 +103,20 @@ def compare_per_class(baseline: dict, transformer: dict, baseline_name: str) -> 
         b = baseline["per_class"][cat]["f1"]
         t = transformer["per_class"][cat]["f1"]
         winner = "tie" if abs(b - t) < 1e-9 else ("transformer" if t > b else baseline_name)
-        out[cat] = {f"{baseline_name}_f1": b, "distilbert_f1": t,
-                    "delta": round(t - b, 4), "winner": winner,
-                    "support": transformer["per_class"][cat]["support"]}
-    out["macro"] = {f"{baseline_name}_f1": baseline["macro_f1"],
-                    "distilbert_f1": transformer["macro_f1"],
-                    "delta": round(transformer["macro_f1"] - baseline["macro_f1"], 4),
-                    "winner": "transformer" if transformer["macro_f1"] > baseline["macro_f1"]
-                    else baseline_name,
-                    "support": transformer["n_test"]}
+        out[cat] = {
+            f"{baseline_name}_f1": b,
+            "distilbert_f1": t,
+            "delta": round(t - b, 4),
+            "winner": winner,
+            "support": transformer["per_class"][cat]["support"],
+        }
+    out["macro"] = {
+        f"{baseline_name}_f1": baseline["macro_f1"],
+        "distilbert_f1": transformer["macro_f1"],
+        "delta": round(transformer["macro_f1"] - baseline["macro_f1"], 4),
+        "winner": "transformer"
+        if transformer["macro_f1"] > baseline["macro_f1"]
+        else baseline_name,
+        "support": transformer["n_test"],
+    }
     return out
